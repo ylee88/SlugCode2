@@ -17,12 +17,12 @@ It will create Hydro/2D/FDM solver.
 
 ### FDM
 
-[x] WENO
-[ ] GP
-[ ] PIF-SF
+- [x] WENO
+- [ ] GP
+- [ ] PIF-SF
 
 ### Temporal
 
-[x] RK2
-[ ] RK3
-[ ] RK4
+- [x] RK2
+- [ ] RK3
+- [ ] RK4
