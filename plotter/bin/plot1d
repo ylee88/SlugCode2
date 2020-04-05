@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import sys
+import slugger as slug
+import matplotlib.pyplot as plt
+from cycler import cycler
+
+if __name__ == "__main__":
+
+    # taking command line args
+    switch = sys.argv[1]
+    data_files = sys.argv[2:]
+    varlist = ['dens', 'pres', 'velx', 'eint']
+
+    if switch == 'all':
+
+        # initialize figures
+        fig, axes = plt.subplots(2, 2)
+
+        # custom cycler
+        cc = (cycler(color=list('rgb')) + cycler(marker=list('.*^')))
+
+        # set title, linestyle
+        for var, ax in zip(varlist, axes.ravel()):
+            ax.set_title(var)
+            ax.set_prop_cycle(cc)
+
+        # actual plots
+        for filename in data_files:
+            data = slug.data1d.ascii(filename)
+
+            for var, ax in zip(varlist, axes.ravel()):
+                data.plot(var, ax)
+
+        axes[0, 0].legend()
+        plt.show()
+
+    else:
+        # initialize figures
+        fig, (ax1) = plt.subplots(1, 1)
+
+        # title & linestyle
+        ax1.set_title(switch)
+        cc = (cycler(color=list('rgb')) + cycler(marker=list('.*^')))
+        ax1.set_prop_cycle(cc)
+
+        # actual plots
+        for filename in data_files:
+            data = slug.data1d.ascii(filename)
+            data.plot(switch, ax1)
+
+        ax1.legend()
+        plt.show()

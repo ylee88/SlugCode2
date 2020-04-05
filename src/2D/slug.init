@@ -1,0 +1,73 @@
+# Please put your runtime parameters: 
+# name, and a space, followed by values 
+
+# sim variables
+sim_name 'vortex'
+
+sim_fixDt .false.
+sim_dt 0.001
+
+sim_cfl 0.4
+sim_tmax 20.
+
+sim_nstep 1
+sim_nlim .false.
+
+# unused for FDM
+sim_riemann 'roe'
+sim_limiter 'mc'
+sim_charLimiting .true.
+
+# high order methods
+sim_order 5
+sim_Torder 2
+sim_RK .true.
+
+# if you need cornerBC, turn this on
+# TODO: need to be renamed
+sim_reconMultiD .true.
+
+# weno things
+sim_WENO '5'               #'5' or 'Z'
+sim_mval 1                 #ROC power for betas'
+sim_WENeps 1.e-36
+
+# gp things
+gp_kernel 'SE'
+gp_quad 'exact'
+gp_radius 2
+gpM_radius 2.0
+gp_ell 1.
+gp_eldel 0.
+
+# grid variables
+gr_ngc 6
+gr_nx 50
+gr_ny 50
+
+gr_xbeg 0.
+gr_xend 20.
+gr_ybeg 0.
+gr_yend 20.
+
+# problem specific physical IC
+sim_icType 'vortex'
+sim_gamma 1.4
+sim_smallPres 1.e-12
+
+# BC type
+sim_bcTypeX 'periodic'
+sim_bcTypeY 'periodic'
+
+# block sizes
+bl_iProcs 2
+bl_jProcs 2
+
+# IO frequency
+sim_ioTfreq 100000. #real
+sim_ioNfreq -1    #positive integer; zero or negative if not used
+sim_outputIntervalTime 0.1
+
+# IO type
+sim_hdf5 .true.
+sim_pIO .true.

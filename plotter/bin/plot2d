@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import sys
+import slugger as slug
+import matplotlib.pyplot as plt
+
+
+if __name__ == '__main__':
+
+    # taking command line args
+    switch = sys.argv[1]
+    filename = sys.argv[2]
+    varlist = ['dens', 'pres', 'velx', 'vely']
+
+    if (switch == 'all'):
+        fig, axes = plt.subplots(2, 2)
+
+        # load data
+        data = slug.load_data2d(filename)
+
+        # checking symmetric
+        sym = data.check_symmetric('pres', tol=1.e-16)
+        if(not sym):
+            fig.suptitle('ASYMMETRIC DATA', color='r')
+
+        for var, ax in zip(varlist, axes.ravel()):
+            data.plot_cmap(var, ax, cmap='prism')
+            ax.set_aspect(aspect=1)
+
+        plt.show()
+
+    elif (switch == 'diff'):
+        f2 = sys.argv[3]
+
+        d1 = slug.load_data2d(filename)
+        d2 = slug.load_data2d(f2)
+
+        data = d1 - d2
+
+        fig, axes = plt.subplots(2, 2)
+
+        fig.suptitle('MAX_dens : ' + str(data.dens.max()))
+
+        for var, ax in zip(varlist, axes.ravel()):
+            data.plot_cmap(var, ax, cmap='prism')
+            ax.set_aspect(aspect=1)
+
+        plt.show()
+
+    elif (switch == 'cont'):
+        fig, (ax) = plt.subplots(1, 1)
+        data = slug.load_data2d(filename)
+
+        var = 'dens'
+
+        sym = data.check_symmetric(var, tol=1.e-16)
+        if(not sym):
+            fig.suptitle('ASYMMETRIC DATA [DENS]', color='r')
+
+        data.plot_cmap(var, ax, cmap='jet')
+        data.plot_contour(var, ax, nlevel=40, linewidths=1,
+                          colors='k')  # cmap='black')
+
+        ax.set_aspect(aspect=1)
+
+        plt.show()
+
+    elif (switch == 'sym'):
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+        data = slug.load_data2d(filename)
+
+        var = 'dens'
+
+        data.plot_symlr(var, ax1, cmap='jet')
+        data.plot_symud(var, ax2, cmap='jet')
+        data.plot_sym45(var, ax3, cmap='jet')
+
+        ax1.set_aspect(aspect=1)
+        ax2.set_aspect(aspect=1)
+        ax3.set_aspect(aspect=1)
+
+        plt.show()
+
+    else:
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+
+        # load data
+        data = slug.load_data2d(filename)
+
+        # checking symmetric
+        sym = data.check_symmetric(switch, tol=1.e-4)
+        if(not sym):
+            fig.suptitle('ASYMMETRIC DATA', color='r')
+
+        data.plot_cmap(switch, ax1, cmap='prism')
+        data.plot_contour(switch, ax2, nlevel=40, colors='k')  # cmap='black')
+
+        ax1.set_aspect(aspect=1)
+        ax2.set_aspect(aspect=1)
+
+        data.plot_slicex(switch, ax3, 'r.-', label='x')
+        # data.plot_slicey(switch, ax4, 'b*-')
+        data.plot_slice45(switch, ax3, 'b*-', label='45')
+
+        data.plot_slicey(switch, ax4, 'r.-', label='y')
+        data.plot_slice45(switch, ax4, 'b*-', label='45')
+
+        ax4.legend()
+        ax3.legend()
+        plt.show()

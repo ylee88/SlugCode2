@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import sys
+import slugger as slug
+import numpy as np
+import scipy.ndimage.interpolation as sci
+import mayavi.mlab as mvi
+
+
+if __name__ == '__main__':
+
+    # taking command line args
+    switch = sys.argv[1]
+    filename = sys.argv[2]
+    varlist = ['dens', 'pres', 'velx', 'vely', 'velz']
+
+    if (switch == 'something'):
+        # print something!
+        exit()
+
+    elif (switch == 'cut'):
+
+        data = slug.load_data3d(filename)
+
+        var = getattr(data, 'dens')
+
+        obj = mvi.pipeline.image_plane_widget(mvi.pipeline.scalar_field(var),
+                            plane_orientation='x_axes',  # normal vector
+                            slice_index=data.xbins/2,
+                        )
+        obj = mvi.pipeline.image_plane_widget(mvi.pipeline.scalar_field(var),
+                            plane_orientation='y_axes',
+                            slice_index=data.ybins/2,
+                        )
+        obj = mvi.pipeline.image_plane_widget(mvi.pipeline.scalar_field(var),
+                            plane_orientation='z_axes',
+                            slice_index=data.zbins/2,
+                        )
+
+        mvi.show()
+
+    elif (switch in varlist):
+        # load data
+        data = slug.load_data3d(filename)
+
+        var = getattr(data, switch)
+        dx = data.x[1] - data.x[0]
+        dy = data.y[1] - data.y[0]
+        dz = data.z[1] - data.z[0]
+        x, y, z = np.mgrid[data.x[0]:data.x[-1]:data.xbins*1j, \
+                           data.y[0]:data.y[-1]:data.ybins*1j, \
+                           data.z[0]:data.z[-1]:data.zbins*1j]
+
+        rot_var = sci.rotate(var, 45, mode='nearest')
+        rot_x = sci.rotate(x, 45, mode='nearest')
+        rot_y = sci.rotate(y, 45, mode='nearest')
+        rot_z = sci.rotate(z, 45, mode='nearest')
+
+        N2 = int(len(rot_var[:, 0, 0])/2)
+
+        mvi.figure(bgcolor=(1., 1., 1.))
+
+        vmin = rot_var[N2, :, :].min()
+        vmax = rot_var[N2, :, :].max()
+
+        mesh = mvi.mesh(x[:, :, 0], y[:, :, 0], z[:, :, 0], scalars=var[:, :, 0], \
+                        vmin=vmin, vmax=vmax, colormap='spectral')
+        mesh = mvi.mesh(x[:, 0, :], y[:, 0, :], z[:, 0, :], scalars=var[:, 0, :], \
+                        vmin=vmin, vmax=vmax, colormap='spectral')
+        mesh = mvi.mesh(x[:, :, -1], y[:, :, -1], z[:, :, -1], scalars=var[:, :, -1], \
+                        vmin=vmin, vmax=vmax, colormap='spectral')
+
+        mesh = mvi.mesh(rot_x[N2, :, :], rot_y[N2, :, :], rot_z[N2, :, :], scalars=rot_var[N2, :, :], \
+                        vmin=vmin, vmax=vmax, colormap='spectral')
+
+        mvi.view(20, 90)
+        cam = mesh.scene.camera
+        cam.zoom(0.7)
+        mvi.show()
+
+    else:
+        print("[ERROR] unrecognized switch")
+        exit()
