@@ -1,8 +1,8 @@
-#SlugCode2
+# SlugCode2
 
 SlugCode2 is in early development stage.
 
-##Install
+## Install
 
 ```sh
 mkdir build
@@ -13,7 +13,7 @@ make
 
 It will create Hydro/2D/FDM solver.
 
-##TODOs
+## TODOs
 
 ### FDM
 

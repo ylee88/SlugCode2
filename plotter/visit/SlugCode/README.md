@@ -1,11 +1,12 @@
-#VisIt plugin for SlugCode
+# VisIt plugin for SlugCode
 
-It enables [VisIt] to read SlugCode's HDF5 output.
+It enables [VisIt](http://http://visitusers.org)
+to read SlugCode's HDF5 output.
 Currently, 1D output is not yet supported.
 
-##Install
+## Install
 
-Assume that [VisIt] is installed under the `PATH`
+Assume that `VisIt` is installed under the `$PATH`
 
 ```sh
 xml2cmake SlugCode.xml
@@ -16,5 +17,3 @@ make
 ```
 
 Then, libraries will be installed under `~/.visit`.
-
-[VisIt](http://http://visitusers.org) 
