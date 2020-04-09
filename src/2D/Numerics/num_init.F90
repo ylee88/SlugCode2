@@ -5,12 +5,16 @@ subroutine num_init()
 
   implicit none
 
-  procedure(temporal) :: soln_RK2
+  procedure(temporal) :: soln_RK2, soln_RK3, soln_RK4
   procedure(spatial) :: soln_WENO
 
   if (sim_RK) then
     if (sim_Torder == 2) then
       num_temporal_method => soln_RK2
+    else if (sim_Torder == 3) then
+      num_temporal_method => soln_RK3
+    else if (sim_Torder == 4) then
+      num_temporal_method => soln_RK4
     else
       call abort_slug("Unrecognized sim_Torder")
     end if
