@@ -6,7 +6,7 @@ subroutine num_init()
   implicit none
 
   procedure(temporal) :: soln_RK2, soln_RK3, soln_RK4
-  procedure(spatial) :: soln_WENO
+  procedure(spatial) :: soln_WENO5
 
   if (sim_RK) then
     if (sim_Torder == 2) then
@@ -24,7 +24,7 @@ subroutine num_init()
 
   if (sim_order == 5) then
     num_radius = 2
-    num_spatial_method => soln_WENO
+    num_spatial_method => soln_WENO5
   else
     call abort_slug("unrecognized sim_order")
   end if

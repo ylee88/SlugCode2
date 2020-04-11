@@ -12,14 +12,14 @@ contains
 
   subroutine char_proj(R, V, stencil_L, stencil_R, dir)
     ! for FDM, this is a flux splitting.
-    ! input: V(stencil)
-    ! output; F_left(stencil), F_right(stencil)
+    ! input: V(var, s)
+    ! output; F_left(s, var), F_right(s, var)
     use grid_data, only: gr_maxSpeed
 
     implicit none
 
     integer, intent(IN) :: R, dir
-    real, dimension(2*R+1, NUMB_VAR), intent(IN) :: V
+    real, dimension(NUMB_VAR, 2*R+1), intent(IN) :: V
     real, dimension(2*R+1, NSYS_VAR), intent(OUT) :: stencil_L, stencil_R
 
     real, dimension(NUMB_VAR) :: Viph, Vimh
@@ -32,8 +32,8 @@ contains
     cntr = R+1
 
     do var = DENS_VAR, NUMB_VAR
-      Viph(var) = 0.5*(V(cntr, var) + V(cntr+1, var))
-      Vimh(var) = 0.5*(V(cntr, var) + V(cntr-1, var))
+      Viph(var) = 0.5*(V(var, cntr) + V(var, cntr+1))
+      Vimh(var) = 0.5*(V(var, cntr) + V(var, cntr-1))
     end do
 
     conservative = .true.
@@ -41,8 +41,8 @@ contains
     call left_eigenvectors(Vimh(:), conservative, leig_L, dir)
 
     do s = 1, 2*R+1
-      call prim2flux(V(s,:), Flux(:), dir)
-      call prim2cons(V(s,:), Cons(:))
+      call prim2flux(V(:,s), Flux(:), dir)
+      call prim2cons(V(:,s), Cons(:))
       do var = 1, NUMB_WAVE
         stencil_R(s, var) = 0.5*dot_product( leig_R(:,var), Flux(:) + gr_maxSpeed(var,dir)*Cons(:) )
         stencil_L(s, var) = 0.5*dot_product( leig_L(:,var), Flux(:) - gr_maxSpeed(var,dir)*Cons(:) )
@@ -58,7 +58,7 @@ contains
     implicit none
 
     integer, intent(IN) :: R, dir
-    real, dimension(2*R+1, NUMB_VAR), intent(IN) :: V
+    real, dimension(NUMB_VAR, 2*R+1), intent(IN) :: V
     real, dimension(NSYS_VAR), intent(IN) :: charL, charR
     real, dimension(NSYS_VAR), intent(OUT) :: fluxL, fluxR
 
@@ -71,8 +71,8 @@ contains
     cntr = R+1
 
     do var = DENS_VAR, NUMB_VAR
-      Viph(var) = 0.5*(V(cntr, var) + V(cntr+1, var))
-      Vimh(var) = 0.5*(V(cntr, var) + V(cntr-1, var))
+      Viph(var) = 0.5*(V(var, cntr) + V(var, cntr+1))
+      Vimh(var) = 0.5*(V(var, cntr) + V(var, cntr-1))
     end do
 
     conservative = .true.

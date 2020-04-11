@@ -62,7 +62,7 @@ OBJS  = slug_driver.o         \
 		soln_RK2.o            \
 		soln_RK3.o            \
 		soln_RK4.o            \
-		soln_WENO.o           \
+		soln_WENO5.o          \
 		soln_getFlux.o        \
 		soln_numeric.o        \
 		soln_spatial.o        \

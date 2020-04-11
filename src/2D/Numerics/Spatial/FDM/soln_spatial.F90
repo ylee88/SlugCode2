@@ -11,7 +11,7 @@ subroutine soln_spatial(dt)
 
   real, intent(IN) :: dt
 
-  real, dimension(num_radius*2+1, NUMB_VAR) :: stencil
+  real, dimension(NUMB_VAR, 2*num_radius+1) :: stencil
   real, dimension(NSYS_VAR) :: tempL, tempR
 
   integer :: i, j, dir
@@ -52,7 +52,7 @@ subroutine soln_spatial(dt)
         do sj = j-jm, j+jp
           do si = i-im, i+ip
             s = s + 1
-            stencil(s, :) = gr_V(:, si, sj)
+            stencil(:, s) = gr_V(:, si, sj)
           end do
         end do
 
