@@ -18,7 +18,7 @@ subroutine soln_WENO5(dt, radius, V, reconL, reconR, dir)
 
   real, intent(IN) :: dt
   integer, intent(IN) :: radius, dir
-  real, dimension(5, NUMB_VAR), intent(IN)    :: V
+  real, dimension(NUMB_VAR, 5), intent(IN)    :: V
   real, dimension(NSYS_VAR),    intent(INOUT) :: reconL, reconR
 
   real, dimension(5, NSYS_VAR) :: stencil_L, stencil_R

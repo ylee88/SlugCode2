@@ -21,7 +21,7 @@ module num_interface
 
       real, intent(IN) :: dt
       integer, intent(IN) :: radius, dir
-      real, dimension(radius*2+1, NUMB_VAR) :: stencilV
+      real, dimension(NUMB_VAR, radius*2+1), intent(IN) :: stencilV
       real, dimension(NSYS_VAR) :: reconL, reconR
     end subroutine spatial
   end interface
