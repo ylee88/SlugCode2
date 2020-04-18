@@ -32,7 +32,7 @@ subroutine soln_spatial(dt, prim, cons, flux)
 
   logical :: conservative
 
-
+  ! for readability
   ibeg = gr_ibeg(XDIM)
   iend = gr_iend(XDIM)
   jbeg = gr_ibeg(YDIM)
@@ -54,18 +54,18 @@ subroutine soln_spatial(dt, prim, cons, flux)
     select case(dir)
     case(XDIM)
       ip = num_radius
-      im = num_radius+1
+      im = num_radius+1  ! we need left biased stencil; i-(r+1):i+r
       jp = 0
       jm = 0
     case(YDIM)
       ip = 0
       im = 0
       jp = num_radius
-      jm = num_radius+1
+      jm = num_radius+1  ! we need left biased stencil; i-(r+1):i+r
     end select
 
-    do j = jbeg-1, jend+1
-      do i = ibeg-1, iend+1
+    do j = jbeg, jend+1
+      do i = ibeg, iend+1
 
         ! make 1D stencil
         s = 0
@@ -78,6 +78,8 @@ subroutine soln_spatial(dt, prim, cons, flux)
           end do
         end do
 
+        ! below block is a flux splitting; doi.org/10.1016/j.jcp.2010.04.013
+        ! we project stencil to i-h
         Vimh = 0.5*(Vstncl(:,num_radius+1) + Vstncl(:,num_radius+2))
         call left_eigenvectors (Vimh(:), conservative, leig, dir)
         call right_eigenvectors(Vimh(:), conservative, reig, dir)
@@ -88,8 +90,15 @@ subroutine soln_spatial(dt, prim, cons, flux)
           end do
         end do
 
-        call num_spatial_method(dt, num_radius, Wstncl_L, Wstncl_R, tempL, tempR, dir)
+        ! (projected)flux reconstruction
+        !             |
+        !    tempL >> | << tmpR
+        !             |
+        !       ------+------
+        !            i-h
+        call num_spatial_method(dt, num_radius, Wstncl_L, Wstncl_R, tempL, tempR)
 
+        ! back projection. result is Fimh
         do var = 1, NSYS_VAR
           gr_flux(var, i, j, dir) = dot_product( tempL(:) + tempR(:), reig(var,:))
         end do

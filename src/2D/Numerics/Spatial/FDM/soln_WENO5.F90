@@ -1,23 +1,29 @@
-subroutine soln_WENO5(dt, radius, Wl, Wr, reconL, reconR, dir)
+subroutine soln_WENO5(dt, radius, Wl, Wr, reconL, reconR)
   ! INPUT:
   !   dt    : infinitesimal time interval
   !   radius: radius of stencil
-  !   V     : (2R+1, NUMB_VAR) primitive vector
-  !   dir   : direction
+  !   Wl    : left biased (projected)stencil;  i-(r+1):i+(r-1)
+  !   Wr    : right biased (projected)stencil; i-r:i+r
   ! OUTPUT:
-  !   reconL: (NSYS_VAR) vector at i-h
-  !   reconR: (NSYS_VAR) vector at i+h
+  !   reconL: reconstructed vector, left of i-h
+  !   reconR: reconstructed vector, right of i-h
+  ! EXAMPLE:
+  !   |         |         | reconL>>|<<reconR |         |         |
+  !   |         |         |         |         |         |         |
+  !   |         |         |         |    i    |         |         |
+  !   +---------+---------+---------+---------+---------+---------+
+  !   |<---------------------  Wl  -------------------->|
+  !             |<---------------------  Wr  -------------------->|
 
 #include "definition.h"
 
   use WENO,     only: betas
   use sim_data, only: sim_WENO, sim_WENeps, sim_mval
-  use char_limiting
 
   implicit none
 
   real, intent(IN) :: dt
-  integer, intent(IN) :: radius, dir
+  integer, intent(IN) :: radius
   real, dimension(5, NSYS_VAR), intent(IN)  :: Wl, Wr
   real, dimension(NSYS_VAR),    intent(OUT) :: reconL, reconR
 
@@ -84,7 +90,7 @@ subroutine soln_WENO5(dt, radius, Wl, Wr, reconL, reconR, dir)
     reconL(var) = dot_product(nonLin_w(:,1), ENO_intp(:,1))
     reconR(var) = dot_product(nonLin_w(:,2), ENO_intp(:,2))
 
-  end do
+  end do  ! end var
 
 
   return
