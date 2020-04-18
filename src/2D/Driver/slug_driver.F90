@@ -6,7 +6,7 @@ program SlugCode
   use grid_data
   use block_data, only : bl_ID
   use io,         only : io_writeOutput
-  use bc
+  use bc,         only : bc_apply
   use mpi,        only : MPI_Wtime
 
   implicit none
@@ -85,7 +85,6 @@ program SlugCode
     call soln_numeric(dt)
     ! update solution
     call soln_update(dt)
-
     ! call BC on primitive vars
     call bc_apply(gr_V)
 
@@ -102,7 +101,6 @@ program SlugCode
       end if
       ioCounter = ioCounter + 1
       ioTimeFreqCounter = ioTimeFreqCounter + 1
-      ! call cpu_time(finish)
       finish = MPI_Wtime()
       call io_writeOutput(t, nStep, ioCounter, finish-start)
     endif
@@ -118,7 +116,6 @@ program SlugCode
           write(*,*)''
         end if
         ioCounter = ioCounter + 1
-        ! call cpu_time(finish)
         finish = MPI_Wtime()
         call io_writeOutput(t, nStep, ioCounter, finish-start)
       endif
@@ -148,7 +145,6 @@ program SlugCode
     write(*,*)'================================================='
     write(*,*)''
   end if
-  ! call cpu_time(finish)
   finish = MPI_Wtime()
   call io_writeOutput(t, nStep,ioCounter+1, finish-start)
 

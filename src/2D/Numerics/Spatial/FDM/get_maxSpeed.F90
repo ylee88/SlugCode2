@@ -3,12 +3,11 @@ subroutine get_maxSpeed(prim)
 #include "definition.h"
 
 
-  use eigensystem
-  use primconsflux
-  use grid_data, only: gr_ibeg,     &
-                       gr_iend,     &
-                       gr_imax,     &
-                       gr_maxSpeed
+  use eigensystem, only: eigenvalues
+  use grid_data,   only: gr_ibeg,     &
+                         gr_iend,     &
+                         gr_imax,     &
+                         gr_maxSpeed
 
   use mpi
 

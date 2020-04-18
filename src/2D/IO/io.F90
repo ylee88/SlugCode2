@@ -113,7 +113,7 @@ contains
 
 
     ! select hyperslab
-    xyoffset = FINDLOC(bl_grid, bl_ID)
+    xyoffset = (/ bl_i, bl_j /)
     xyoffset = xyoffset-1
     hs_start(1) = 0
     hs_start(2) = xyoffset(1)*gr_nx

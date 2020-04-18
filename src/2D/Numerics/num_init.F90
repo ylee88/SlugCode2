@@ -1,6 +1,8 @@
 subroutine num_init()
 
-  use sim_data
+  use sim_data, only: sim_Torder, &
+                      sim_order,  &
+                      sim_RK
   use num_data
 
   implicit none

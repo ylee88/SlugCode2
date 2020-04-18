@@ -2,26 +2,42 @@ subroutine soln_RK2(dt)
 
 #include "definition.h"
 
-  use grid_data, only: gr_V, &
+  use grid_data, only: gr_V,    &
                        gr_flux, &
-                       gr_imax
+                       gr_imax, &
+                       gr_ibeg, gr_iend
   use primconsflux
   use bc, only: bc_apply
 
   implicit none
   real, intent(IN) :: dt
-  real :: dtx,dty
-  integer :: m, i, j
+  real :: dtx, dty
+  integer :: m, i, j, dir
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: Uk
-  real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), NDIM) :: Flux !(var,i,j,ndim)
+  real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), NDIM) :: mFlux !(var,i,j,ndim)
 
-  Flux = 0.
+  real, dimension(NUMB_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: prim
+  real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: cons
+  real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), NDIM) :: flux
+
+  mFlux = 0.
   dtx = dt/gr_dx
   dty = dt/gr_dy
 
   do m = 1, 2
 
-    call soln_spatial(dt)
+    ! initial data for spatial recon/intp
+    prim = gr_V
+    do j = gr_i0(YDIM), gr_imax(YDIM)
+      do i = gr_i0(XDIM), gr_imax(XDIM)
+        call prim2cons(prim(:,i,j), cons(:,i,j))
+        do dir = XDIM, NDIM
+          call prim2flux(prim(:,i,j), flux(:,i,j,dir), dir)
+        end do
+      end do
+    end do
+    ! spatial recon/intp
+    call soln_spatial(dt, prim, cons, flux)
 
     Uk = 0.
     if (m == 1) then
@@ -37,11 +53,11 @@ subroutine soln_RK2(dt)
 
     call bc_apply(gr_V)
 
-    Flux(:,:,:,:) = Flux(:,:,:,:) + 0.5*gr_flux(:,:,:,:)
+    mFlux(:,:,:,:) = mFlux(:,:,:,:) + 0.5*gr_flux(:,:,:,:)
 
   end do
 
-  gr_flux(DENS_VAR:ENER_VAR,:,:,:) = Flux(DENS_VAR:ENER_VAR,:,:,:)
+  gr_flux(DENS_VAR:ENER_VAR,:,:,:) = mFlux(DENS_VAR:ENER_VAR,:,:,:)
 
   return
 

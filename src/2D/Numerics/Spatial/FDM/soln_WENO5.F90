@@ -1,4 +1,4 @@
-subroutine soln_WENO5(dt, radius, V, reconL, reconR, dir)
+subroutine soln_WENO5(dt, radius, Wl, Wr, reconL, reconR, dir)
   ! INPUT:
   !   dt    : infinitesimal time interval
   !   radius: radius of stencil
@@ -18,16 +18,13 @@ subroutine soln_WENO5(dt, radius, V, reconL, reconR, dir)
 
   real, intent(IN) :: dt
   integer, intent(IN) :: radius, dir
-  real, dimension(NUMB_VAR, 5), intent(IN)    :: V
-  real, dimension(NSYS_VAR),    intent(INOUT) :: reconL, reconR
+  real, dimension(5, NSYS_VAR), intent(IN)  :: Wl, Wr
+  real, dimension(NSYS_VAR),    intent(OUT) :: reconL, reconR
 
-  real, dimension(5, NSYS_VAR) :: stencil_L, stencil_R
   real, dimension(3) :: lin_w
   real, dimension(3) :: smth_ind_L, smth_ind_R
   real, dimension(3, 3) :: ENO_coeff
   real, dimension(3, 2) :: ENO_intp, nonLin_w
-
-  real, dimension(NSYS_VAR) :: tempL, tempR
 
   integer :: var, s, r
   real    :: w_norm
@@ -41,55 +38,54 @@ subroutine soln_WENO5(dt, radius, V, reconL, reconR, dir)
 
   ENO_coeff = ENO_coeff/6.
 
-  ! char limiting for FVM
-  ! flux splitting for FDM
-  call char_proj(radius, V(:,:), stencil_L(:,:), stencil_R(:,:), dir)
 
   do var = 1, NSYS_VAR
 
     !get smoothness indicators
-    call betas(stencil_L(:,var), radius, smth_ind_L)
-    call betas(stencil_R(:,var), radius, smth_ind_R)
+    call betas(Wl(:,var), radius, smth_ind_L)
+    call betas(Wr(:,var), radius, smth_ind_R)
 
-    !compute non-linear weights
+    ! compute non-linear weights
     do s = 1, 3
       r = 4 - s
       if (sim_WENO == '5') then
         !WENO-JS
-        nonLin_w(s,1) = lin_w(s)/(sim_WENeps + smth_ind_L(s))**sim_mval  ! left : i->imh
-        nonLin_w(s,2) = lin_w(r)/(sim_WENeps + smth_ind_R(s))**sim_mval  ! right: i->iph
+        nonLin_w(s,1) = lin_w(r)/(sim_WENeps + smth_ind_L(s))**sim_mval  ! left : i->iph
+        nonLin_w(s,2) = lin_w(s)/(sim_WENeps + smth_ind_R(s))**sim_mval  ! right: i->imh
       else if (sim_WENO == 'Z') then
         !WENO-Z
-        nonLin_w(s,1) = lin_w(s)*(1.+&   ! left : i->imh
+        nonLin_w(s,1) = lin_w(r)*(1.+&   ! left : i->iph
              abs(smth_ind_L(3)-smth_ind_L(1))/(sim_WENeps+smth_ind_L(s)))**sim_mval
-        nonLin_w(s,2) = lin_w(r)*(1.+&   ! right: i->iph
+        nonLin_w(s,2) = lin_w(s)*(1.+&   ! right: i->imh
              abs(smth_ind_R(3)-smth_ind_R(1))/(sim_WENeps+smth_ind_R(s)))**sim_mval
       else
         call abort_slug("unrecognized sim_WENO")
       end if
     end do
 
+    ! normalize non-linear weights
     w_norm = SUM(nonLin_w(:,1))
     nonLin_w(:,1) = nonLin_w(:,1)/w_norm
     w_norm = SUM(nonLin_w(:,2))
     nonLin_w(:,2) = nonLin_w(:,2)/w_norm
 
-    !calculate ENO interpolations
+    ! calculate ENO interpolations
     do s = 1, 3
       r = 4 - s
-      ENO_intp(s,1) = dot_product(stencil_L(s:s+2   ,var), ENO_coeff(:,s))
-      ENO_intp(s,2) = dot_product(stencil_R(s+2:s:-1,var), ENO_coeff(:,r))
+      ENO_intp(s,1) = dot_product(Wl(s+2:s:-1,var), ENO_coeff(:,r))
+      ENO_intp(s,2) = dot_product(Wr(s:s+2   ,var), ENO_coeff(:,s))
     end do
 
-    !take convex combination of ENO statets
-    tempL(var) = dot_product(nonLin_w(:,1), ENO_intp(:,1))
-    tempR(var) = dot_product(nonLin_w(:,2), ENO_intp(:,2))
+    ! take convex combination of ENO statets
+    !           |
+    !  reconL>> | <<reconR
+    !      -----+-----
+    !          imh
+    reconL(var) = dot_product(nonLin_w(:,1), ENO_intp(:,1))
+    reconR(var) = dot_product(nonLin_w(:,2), ENO_intp(:,2))
 
   end do
 
-  ! project back from char field
-  call char_back_proj(radius, V(:,:), tempL(:), tempR(:), &
-                      reconL(:), reconR(:), dir)
 
   return
 end subroutine soln_WENO5

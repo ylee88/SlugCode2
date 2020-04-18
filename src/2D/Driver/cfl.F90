@@ -2,9 +2,11 @@ subroutine cfl(dt)
 
 #include "definition.h"
 
-  use grid_data
-  use sim_data, only: sim_cfl
+  use sim_data,   only: sim_cfl
   use block_data, only: bl_delT
+  use grid_data,  only: gr_V,             &
+                        gr_ibeg, gr_iend, &
+                        gr_dx, gr_dy
 
   use mpi
 
