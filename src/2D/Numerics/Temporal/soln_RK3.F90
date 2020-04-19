@@ -2,14 +2,19 @@ subroutine soln_RK3(dt)
 
 #include "definition.h"
 
-  use grid_data, only: gr_V,           &
-                       gr_flux,        &
-                       gr_i0, gr_imax, &
+  use grid_data, only: gr_V,             &
+                       gr_U,             &
+                       gr_flux,          &
+                       gr_dx, gr_dy,     &
+                       gr_i0, gr_imax,   &
                        gr_ibeg, gr_iend
-  use primconsflux
+  use primconsflux, only: prim2cons,     &
+                          prim2flux,     &
+                          cons2prim
   use bc, only: bc_apply
 
   implicit none
+
   real, intent(IN) :: dt
   real :: dtx, dty, F
   integer :: m, i, j, dir
