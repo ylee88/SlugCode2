@@ -85,6 +85,14 @@ def FDM2D(args=None):
         os.symlink(os.path.join(config.root, 'Makefile'), './Makefile')
         os.symlink(os.path.join(src_path, 'Makefile.header'), './Makefile.header')
 
+    # copy init files
+    init_files = [f for f in os.listdir('../inits')
+                  if f.endswith('.init')]
+    for init in init_files:
+        init_orig = os.path.join('../inits', init)
+        init_base = os.path.join('.', init)
+        shutil.copy(init_orig, init_base)
+
     # print(config.Mesh.files)
     # print(config.IO.files)
     # print(config.System.files)
