@@ -6,7 +6,7 @@ subroutine abort_slug(msg)
 
   implicit none
 
-  character(len=MAX_STRING_LENGTH), intent(IN) :: msg
+  character(len=*), intent(IN) :: msg
   integer :: ierr
 
   write(*,*)'ERROR: ', msg

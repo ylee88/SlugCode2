@@ -19,9 +19,9 @@ module bc
                         bl_iProcs,   &
                         bl_jProcs
 
-  use sim_data,  only: sim_reconMultiD, &
-                       sim_bcTypex,     &
-                       sim_bcTypey
+  use sim_data,  only: sim_bcTypex,  &
+                       sim_bcTypey,  &
+                       sim_cornerBC
   use mpi
 
   implicit none
@@ -36,7 +36,7 @@ module bc
     real, dimension(NUMB_VAR, gr_imax(XDIM), gr_imax(YDIM)), intent(INOUT) :: V
 
     call bc_normal(V)
-    if (sim_reconMultiD) call bc_corner(V)
+    if (sim_cornerBC) call bc_corner(V)
 
   end subroutine bc_apply
 

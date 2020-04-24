@@ -24,8 +24,7 @@ sim_Torder 2
 sim_RK .true.
 
 # if you need cornerBC, turn this on
-# TODO: need to be renamed
-sim_reconMultiD .true.
+sim_cornerBC .true.
 
 # weno things
 sim_WENO '5'               #'5' or 'Z'

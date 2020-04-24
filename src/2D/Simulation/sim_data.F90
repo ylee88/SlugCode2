@@ -8,7 +8,7 @@ module sim_data
   real, save :: sim_cfl, sim_tmax, sim_outputIntervalTime, sim_dt, sim_WENeps
   integer, save :: sim_order, sim_nStep, sim_Torder, sim_mval
   character(len=MAX_STRING_LENGTH), save :: sim_name, sim_riemann, sim_WENO
-  logical, save :: sim_charLimiting, sim_RK, sim_fixDt, sim_nlim, sim_reconMultiD
+  logical, save :: sim_charLimiting, sim_RK, sim_fixDt, sim_nlim
 
   !! ICs
   real, save :: sim_gamma
@@ -18,6 +18,7 @@ module sim_data
   !! BCs
   character(len=MAX_STRING_LENGTH), save :: sim_bcTypeX, sim_bcTypeY
   integer                         , save :: sim_xBC, sim_yBC
+  logical                         , save :: sim_cornerBC
 
   !! IO
   integer, save :: sim_ioNfreq

@@ -37,6 +37,6 @@ It will create 2D/Hydro/FDM solver.
 - [x] RK2
 - [x] RK3
 - [x] RK4
-- [ ] PIF-SF
+- [x] PIF-SF
 
 ### FVM

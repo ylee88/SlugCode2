@@ -9,7 +9,7 @@ subroutine bc_init()
 
   use sim_data, only: sim_bcTypex, &
                       sim_bcTypey, &
-                      sim_reconMultiD
+                      sim_cornerBC
 
   use mpi, only: MPI_PROC_NULL
 
@@ -77,7 +77,7 @@ subroutine bc_init()
   !            |          |       |
   !          4  ----------  3     |
   !                               +-----> i
-  if (sim_reconMultiD) then
+  if (sim_cornerBC) then
     allocate(bl_cornerBC(4)); bl_cornerBC = 0
 
     bl_cornerBC(1) = bl_grid_ext(bl_i-1,bl_j+1)

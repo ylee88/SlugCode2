@@ -31,7 +31,7 @@ FFLAGS_DEBUG2 = -ggdb  -g -fdefault-real-8 -fdefault-double-8\
 FFLAGS_DEBUG4 = -ggdb  -g -freal-4-real-16 -freal-8-real-16\
 	-ffree-line-length-none -Wall
 
-FFLAGS_DOUB = $(FFLAGS_DEBUG2)
+FFLAGS_DOUB = $(FFLAGS_OPT2)
 FFLAGS_QUAD = $(FFLAGS_DEBUG4)
 
 OBJS  = slug_driver.o         \
@@ -61,6 +61,10 @@ OBJS  = slug_driver.o         \
 		soln_RK2.o            \
 		soln_RK3.o            \
 		soln_RK4.o            \
+		soln_sfPIF3.o         \
+		soln_sfPIF4.o         \
+		num_diff.o            \
+		sfPIF.o               \
 		soln_WENO5.o          \
 		soln_numeric.o        \
 		soln_spatial.o        \

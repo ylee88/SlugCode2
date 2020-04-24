@@ -33,7 +33,7 @@ subroutine read_pars(filename)
   call read_initFileBool(filename,'sim_hdf5',  sim_hdf5)
   call read_initFileBool(filename,'sim_pIO',   sim_pIO)
 
-  call read_initFileBool(filename,'sim_reconMultiD',sim_reconMultiD)
+  call read_initFileBool(filename,'sim_cornerBC', sim_cornerBC)
 
   call read_initFileChar(filename,'sim_icType',   sim_icType)
   call read_initFileReal(filename,'sim_gamma',    sim_gamma)
