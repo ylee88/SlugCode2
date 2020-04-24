@@ -31,7 +31,7 @@ FFLAGS_DEBUG2 = -ggdb  -g -fdefault-real-8 -fdefault-double-8\
 FFLAGS_DEBUG4 = -ggdb  -g -freal-4-real-16 -freal-8-real-16\
 	-ffree-line-length-none -Wall
 
-FFLAGS_DOUB = $(FFLAGS_OPT2)
+FFLAGS_DOUB = $(FFLAGS_DEBUG2)
 FFLAGS_QUAD = $(FFLAGS_DEBUG4)
 
 OBJS  = slug_driver.o         \
