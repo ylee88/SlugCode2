@@ -26,7 +26,9 @@ module sim_data
   logical, save :: sim_hdf5, sim_pIO
 
   !! GP
-  ! character(len=MAX_STRING_LENGTH), save :: sim_quad, sim_gp_kernel
-  ! real, save :: sim_sigdel, sim_sigma, sim_matern_nu, sim_RQ_alpha
+  logical, save :: sim_gpWENO
+  character(len=MAX_STRING_LENGTH), save :: sim_gpKernel
+  integer, save :: sim_gpRadii
+  real,    save :: sim_gpEll, sim_gpEldel
 
 end module sim_data

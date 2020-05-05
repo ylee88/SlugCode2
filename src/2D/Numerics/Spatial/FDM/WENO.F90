@@ -4,6 +4,30 @@ module WENO
 
 contains
 
+  subroutine gp_betas(V, R, beta)
+
+    use gp_data , only:  gp_Pvecs
+    implicit none
+
+    integer,                   intent(IN   ) :: R
+    real   , dimension(2*R+1), intent(IN   ) :: V
+    real   , dimension(  R+1), intent(INOUT) :: beta
+
+    integer i, N, s
+
+    N = R+1
+    !loop over stencils
+    do s = 1 ,N
+       !loop over eigen values
+       beta(s) = dot_product(V(s:s+R), gp_Pvecs(:,1))**2
+       do i = 2, N
+          beta(s) = beta(s) + dot_product(V(s:s+R), gp_Pvecs(:,i))**2
+       end do
+    end do
+
+    return
+  end subroutine gp_betas
+
   subroutine betas(V, R, beta)
     !subroutine to calculate the smoothness-indicators for a WENO scheme on a 2R+1 point stencil
     implicit none

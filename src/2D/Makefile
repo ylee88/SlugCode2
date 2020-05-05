@@ -51,7 +51,6 @@ OBJS  = slug_driver.o         \
 		grid_finalize.o       \
 		sim_data.o            \
 		sim_initBlock.o       \
-		WENO.o                \
 		eigensystem.o         \
 		get_maxSpeed.o        \
 		num_data.o            \
@@ -65,7 +64,14 @@ OBJS  = slug_driver.o         \
 		soln_sfPIF4.o         \
 		num_diff.o            \
 		sfPIF.o               \
+		WENO.o                \
 		soln_WENO5.o          \
+		gp_data.o             \
+		gp_WENOinit.o         \
+		gp_interface.o        \
+		GP.o                  \
+		linalg.o              \
+		soln_gpWENO.o         \
 		soln_numeric.o        \
 		soln_spatial.o        \
 		soln_update.o

@@ -64,13 +64,10 @@ subroutine read_pars(filename)
 
 
   ! !read in GP pars
-  ! gpM_radius = 0.0
-  ! call read_initFileReal(filename,'gr_radius',   gr_radius)
-  ! call read_initFileChar(filename,'gp_quad'  ,  gp_quad  )
-  ! call read_initFileChar(filename,'gp_kernel',  gp_kernel)
-  ! call read_initFileReal(filename,'gp_ell'    ,  gp_el    )
-  ! call read_initFileReal(filename,'gp_eldel' ,  gp_eldel )
-  ! call read_initFileInt (filename,'gp_radius',  gp_radius)
-  ! call read_initFileReal(filename,'gpM_radius'    ,  gpM_radius)
+  call read_initFileBool(filename,'sim_gpWENO',   sim_gpWENO)
+  call read_initFileChar(filename,'sim_gpKernel', sim_gpKernel)
+  call read_initFileInt (filename,'sim_gpRadii',  sim_gpRadii)
+  call read_initFileReal(filename,'sim_gpEll',     sim_gpEll)
+  call read_initFileReal(filename,'sim_gpEldel',  sim_gpEldel)
 
 end subroutine read_pars
