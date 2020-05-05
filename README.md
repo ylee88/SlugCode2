@@ -17,7 +17,7 @@ It will create 2D/Hydro/FDM solver.
 ## TODOs
 
 - [ ] Implement internal boundary: `BDRY_VAR`
-- [ ] Add example `init` files.
+- [x] Add example `init` files.
 - [ ] Add abort conditions for `gr_ngc`
     - [ ] `if gr_ngc > [gr_nx, gr_ny]: abort`
     - [ ] `if gr_ngc < # of guad cell needed: abort`
@@ -30,7 +30,7 @@ It will create 2D/Hydro/FDM solver.
 #### Spatial
 
 - [x] WENO
-- [ ] GP
+- [x] GP-WENO
 
 #### Temporal
 
