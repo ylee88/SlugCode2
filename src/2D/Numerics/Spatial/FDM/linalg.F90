@@ -17,18 +17,18 @@ contains
     real(qp) :: small
     integer :: i, j, k
 
-    small = 0.
+    small = 0._qp
 
     !initialize L
-    D = 0.
-    L = 0.
-    R = 0.
+    D = 0._qp
+    L = 0._qp
+    R = 0._qp
 
     !!!!!LDL decomposition !!!!!!!!!
     !D(1) = A(1,1)
     do i = 1,N
       do j = 1,i
-        if (D(j) == 0.) then
+        if (abs(D(j)) < 1.q-36) then
           D(j) = A(j,j)+small
           do k = 1, j-1
             D(j) = D(j) - D(k)*R(j,k)**2
@@ -42,14 +42,13 @@ contains
       end do
     end do
 
+    D = abs(D)   ! D should be positive
     do i = 1, N
       do j = 1,i
         L(i,j) = R(i,j)*SQRT(D(j))
       end do
     end do
 
-
-    !stop
   end subroutine chol
 
   subroutine LSTSQ(M, N, A, x, b)
