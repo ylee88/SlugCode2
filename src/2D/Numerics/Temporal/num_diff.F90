@@ -7,6 +7,60 @@ module num_diff
 contains
 
 
+  !!!!! experimental
+  function diff1_weno(q, Nx, dir) result(f)
+
+    use WENO
+    implicit none
+
+    integer, intent(IN) :: Nx, dir
+    real, dimension(NSYS_VAR, Nx), intent(IN) :: q
+
+    real, dimension(NSYS_VAR) :: f
+    real, dimension(3) :: smth_ind, linW, nonLinW
+    real, dimension(5) :: C, cl, cm, cr
+
+    real :: delta, sumW
+    integer :: i, var, k
+
+    select case(dir)
+    case(XDIM)
+      delta = gr_dx
+    case(YDIM)
+      delta = gr_dy
+    case DEFAULT
+      delta = 0.
+      call abort_slug("[diff1] Wrong dir value")
+    end select
+
+    C  = (/  1., -8.,  0.,  8., -1. /)/(12.*delta)
+    cl = (/  1., -4.,  3.,  0.,  0. /)/(2.*delta)
+    cm = (/  0., -1.,  0.,  1.,  0. /)/(2.*delta)
+    cr = (/  0.,  0., -3.,  4., -1. /)/(2.*delta)
+
+    linW = (/ 1., 4., 1. /)/6.
+
+    do var = 1, NSYS_VAR
+      call betas(q(var, :), 2, smth_ind)
+    end do
+
+    do k = 1, 3
+      nonLinW(k) = linW(k)/(1.E-36 + smth_ind(k))**1
+    end do
+
+    sumW = SUM(nonLinW)
+    nonLinW(:) = nonLinW(:)/sumW
+
+    C(:) = nonLinW(1)*cl(:) + nonLinW(2)*cm + nonLinW(3)*cr
+
+    do var = 1, NSYS_VAR
+      f(var) = dot_product(q(var, :), C)
+    end do
+
+  end function diff1_weno
+  !!!!!
+
+
   function diff1(q, Nx, dir) result(f)
     implicit none
 
