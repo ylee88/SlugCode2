@@ -73,7 +73,8 @@ OBJS  = slug_driver.o         \
 		gp_interface.o        \
 		GP.o                  \
 		linalg.o              \
-		soln_gpWENO.o         \
+		soln_gpWENO5.o        \
+		soln_gpWENO7.o        \
 		soln_numeric.o        \
 		soln_spatial.o        \
 		soln_update.o

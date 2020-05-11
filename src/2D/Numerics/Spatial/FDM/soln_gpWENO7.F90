@@ -1,4 +1,4 @@
-subroutine soln_gpWENO(dt, radius, Wl, Wr, reconL, reconR)
+subroutine soln_gpWENO7(dt, radius, Wl, Wr, reconL, reconR)
   ! INPUT:
   !   dt    : infinitesimal time interval
   !   radius: radius of stencil
@@ -19,24 +19,26 @@ subroutine soln_gpWENO(dt, radius, Wl, Wr, reconL, reconR)
 
   use gp_data, only: gp_linW, gp_Zk
   use WENO,    only: gp_betas
-  use sim_data, only: sim_WENeps, sim_mval, sim_gpRadii
+  use sim_data, only: sim_WENeps, sim_mval
 
   implicit none
 
+  ! this will determine the order of current subroutine.
+  integer, parameter :: R = 3
+
   real, intent(IN) :: dt
   integer, intent(IN) :: radius
-  real, dimension(2*sim_gpRadii+1, NSYS_VAR), intent(IN)  :: Wl, Wr
+  real, dimension(2*R+1, NSYS_VAR), intent(IN)  :: Wl, Wr
   real, dimension(NSYS_VAR),    intent(OUT) :: reconL, reconR
 
-  real, dimension(sim_gpRadii+1) :: smth_ind_L, smth_ind_R
+  real, dimension(R+1) :: smth_ind_L, smth_ind_R
 
-  real, dimension(sim_gpRadii+1, 2) :: wbar, weights
-  real, dimension(sim_gpRadii+1)    :: vMk, vPk
+  real, dimension(R+1, 2) :: wbar, weights
+  real, dimension(R+1)    :: vMk, vPk
 
-  integer :: var, R, k, N, M
+  integer :: var, k, N, M
   real    :: sum_wbar
 
-  R = sim_gpRadii
   M = R+1
   N = 2*R+1
 
@@ -73,4 +75,4 @@ subroutine soln_gpWENO(dt, radius, Wl, Wr, reconL, reconR)
     reconR(var) = dot_product(weights(:,2), vMk(:))
   end do
 
-end subroutine soln_gpWENO
+end subroutine soln_gpWENO7

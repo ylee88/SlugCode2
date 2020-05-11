@@ -13,7 +13,7 @@ subroutine num_init()
   procedure(temporal) :: soln_RK2, soln_RK3, soln_RK4
   procedure(temporal) :: soln_sfPIF3, soln_sfPIF4
   procedure(spatial) :: soln_WENO5
-  procedure(spatial) :: soln_gpWENO
+  procedure(spatial) :: soln_gpWENO5, soln_gpWENO7
 
   if (sim_RK) then
     ! RK doesn't need corner exchanges
@@ -45,7 +45,13 @@ subroutine num_init()
   if (sim_gpWENO) then
     call gp_WENOinit()
     num_radius = sim_gpRadii
-    num_spatial_method => soln_gpWENO
+    if (num_radius == 2) then
+      num_spatial_method => soln_gpWENO5
+    else if (num_radius == 3) then
+      num_spatial_method => soln_gpWENO7
+    else
+      call abort_slug("unrecognized sim_gpRadii")
+    end if
   else
     if (sim_order == 5) then
       num_radius = 2
