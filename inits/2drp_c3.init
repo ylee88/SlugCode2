@@ -37,6 +37,7 @@ sim_gpKernel 'SE'
 sim_gpRadii 2
 sim_gpEll 1.
 sim_gpEldel 0.
+sim_gpSigdel 2.
 
 # grid variables
 gr_ngc 6

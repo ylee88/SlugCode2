@@ -9,7 +9,8 @@ subroutine gp_WENOinit()
   use sim_data,  only: sim_gpRadii,  &
                        sim_gpEll,    &
                        sim_gpEldel,  &
-                       sim_gpKernel
+                       sim_gpKernel, &
+                       sim_gpSigdel
 
   implicit none
 
@@ -34,7 +35,7 @@ subroutine gp_WENOinit()
   real(qp), dimension(sim_gpRadii+1) :: ul, Pk
   real(qp), dimension(2*sim_gpRadii+1) :: un
 
-  real(qp) :: el, eldel
+  real(qp) :: eldel, sigdel
 
   integer :: LR, i, j, N, M, ROW, COL, R, LDA, LWORK, INFO
 
@@ -142,9 +143,11 @@ subroutine gp_WENOinit()
   N = R+1
   LDA = N
   LWORK = 66*N
+  ! quad <- double precision
+  sigdel = sim_gpSigdel
   do i = 1, N
      do j = 1, N
-        Ck(i,j) = gp_kernel(REAL(i, qp), REAL(j, qp), eldel)    ! calc. K. See eqn 42 and 43
+        Ck(i,j) = gp_kernel(REAL(i, qp), REAL(j, qp), sigdel)    ! calc. K. See eqn 42 and 43
      end do
   end do
   ! truncate to double precision

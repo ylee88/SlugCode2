@@ -29,6 +29,6 @@ module sim_data
   logical, save :: sim_gpWENO
   character(len=MAX_STRING_LENGTH), save :: sim_gpKernel
   integer, save :: sim_gpRadii
-  real,    save :: sim_gpEll, sim_gpEldel
+  real,    save :: sim_gpEll, sim_gpEldel, sim_gpSigdel
 
 end module sim_data
