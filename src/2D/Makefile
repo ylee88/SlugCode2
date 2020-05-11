@@ -16,19 +16,21 @@ endif
 LDFLAGS += -lhdf5_fortran
 
 # double precision
-FFLAGS_OPT2 = -O3 -fdefault-real-8 -fdefault-double-8\
-	-ffree-line-length-none
+FFLAGS_OPT2 = -fPIC -O3 -march=native -ffast-math\
+			  -fdefault-real-8 -fdefault-double-8\
+			  -ffree-line-length-none
 
 # quadruple precision
-FFLAGS_OPT4 = -O3 -freal-4-real-16 -freal-8-real-16\
-	-ffree-line-length-none
+FFLAGS_OPT4 = -fPIC -O3 -march=native -ffast-math\
+			  -freal-4-real-16 -freal-8-real-16\
+			  -ffree-line-length-none
 
 # double precision
-FFLAGS_DEBUG2 = -ggdb  -g -fdefault-real-8 -fdefault-double-8\
+FFLAGS_DEBUG2 = -fPIC -ggdb -g -fdefault-real-8 -fdefault-double-8\
 	-ffree-line-length-none -Wall
 
 # quadruple precision
-FFLAGS_DEBUG4 = -ggdb  -g -freal-4-real-16 -freal-8-real-16\
+FFLAGS_DEBUG4 = -fPIC -ggdb -g -freal-4-real-16 -freal-8-real-16\
 	-ffree-line-length-none -Wall
 
 FFLAGS_DOUB = $(FFLAGS_DEBUG2)
