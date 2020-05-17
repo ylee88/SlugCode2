@@ -18,9 +18,9 @@ It will create 2D/Hydro/FDM solver.
 
 - [ ] Implement internal boundary: `BDRY_VAR`
 - [x] Add example `init` files.
-- [ ] Add abort conditions for `gr_ngc`
-    - [ ] `if gr_ngc > [gr_nx, gr_ny]: abort`
-    - [ ] `if gr_ngc < # of guad cell needed: abort`
+- [x] Add abort conditions for `gr_ngc`
+    - [x] `if gr_ngc > [gr_nx, gr_ny]: abort`
+    - [x] `if gr_ngc < # of guad cell needed: abort`
 - [ ] Rearrange folder structure -> eg:`FDM/[spatial temporal]`
 - [ ] Makefile in each directory to handle `OBJS` accordingly
     - [ ] Edit `setup.py` to write relevant `Makefile`

@@ -6,6 +6,7 @@ subroutine num_init()
                       sim_cornerBC, &
                       sim_gpWENO,   &
                       sim_gpRadii
+  use grid_data, only: gr_ngc
   use num_data
 
   implicit none
@@ -61,6 +62,19 @@ subroutine num_init()
     end if
   end if
 
-
+  ! check if there are sufficient guard cells.
+  ! sfPIF needs more guard cells b/c num_diffs
+  if (.not. sim_RK) then
+    if (num_radius + 1 + 2 > gr_ngc) then
+      print *, "With sfPIF, at least", num_radius+1+2, "guard cells are required. gr_ngc =", gr_ngc
+      call abort_slug("Wrong # of guard cells")
+    end if
+  else
+    ! RK needs r+1 gc's
+    if (num_radius + 1 > gr_ngc) then
+      print *, "At least", num_radius+1, "guard cells are required. gr_ngc =", gr_ngc
+      call abort_slug("Wrong # of guard cells")
+    end if
+  end if
 
 end subroutine num_init

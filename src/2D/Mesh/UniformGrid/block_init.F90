@@ -53,6 +53,10 @@ subroutine block_init()
   gr_nx = nBlockx
   gr_ny = nBlocky
 
+  ! check if there are too much of guard cells.
+  if (gr_nx < gr_ngc) call abort_slug("Wrong # of guard cells: gr_nx < gr_ngc")
+  if (gr_ny < gr_ngc) call abort_slug("Wrong # of guard cells: gr_ny < gr_ngc")
+
   ! init extended virtual block topology.
   ! This will be useful to apply BC's.
   !
