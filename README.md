@@ -7,7 +7,7 @@ SlugCode2 is in early development stage.
 ```sh
 mkdir build
 cd build
-../utils/setupSlug.py
+../utils/setupSlug.py --fdm2d
 # edit Makefile.header
 make
 ```
@@ -27,16 +27,22 @@ It will create 2D/Hydro/FDM solver.
 
 ### FDM
 
+- Spatial: WENO, gp-WENO
+- Temporal: RK[2, 3, 4], sfPIF[3, 4]
+
+- [x] 2D
+- [x] 3D
+
+### FVM
+
 #### Spatial
 
-- [x] WENO
-- [x] GP-WENO
+- [ ] WENO
+- [ ] GP-WENO
 
 #### Temporal
 
-- [x] RK2
-- [x] RK3
-- [x] RK4
-- [x] PIF-SF
-
-### FVM
+- [ ] RK2
+- [ ] RK3
+- [ ] RK4
+- [ ] PIF-SF

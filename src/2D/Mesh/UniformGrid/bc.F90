@@ -2,8 +2,7 @@ module bc
 
 #include "definition.h"
 
-  use grid_data, only: gr_imax, &
-                       gr_i0,   &
+  use grid_data, only: gr_i0,   &
                        gr_imax, &
                        gr_ibeg, &
                        gr_iend, &
