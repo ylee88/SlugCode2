@@ -63,7 +63,8 @@ module bc
     integer :: k0, kmax, kbeg, kend
 
     integer :: gc
-    integer :: send, recv, stag, rtag, stat, ierr
+    integer :: send, recv, stag, rtag, ierr
+    integer, dimension(MPI_STATUS_SIZE) :: stat
 
     ! for readability
     gc = gr_ngc - 1
@@ -94,6 +95,7 @@ module bc
     stag = 0
     rtag = 0
 
+    call MPI_Barrier(MPI_COMM_WORLD, ierr)
     ! excange along non-domain boundary
     ! send to left & receive from right
     send = bl_BC(1)
@@ -122,14 +124,14 @@ module bc
     ! send to down & receive from up
     send = bl_BC(5)
     recv = bl_BC(6)
-    call MPI_Sendrecv(loc_buffD, NUMB_VAR*gr_nx*gr_ngc*gr_nz, MPI_DOUBLE_PRECISION, send, stag, &
-                      rcv_buffU, NUMB_VAR*gr_nx*gr_ngc*gr_nz, MPI_DOUBLE_PRECISION, recv, rtag, &
+    call MPI_Sendrecv(loc_buffD, NUMB_VAR*gr_nx*gr_ny*gr_ngc, MPI_DOUBLE_PRECISION, send, stag, &
+                      rcv_buffU, NUMB_VAR*gr_nx*gr_ny*gr_ngc, MPI_DOUBLE_PRECISION, recv, rtag, &
                       MPI_COMM_WORLD, stat, ierr)
     ! send to down & receive from up
     send = bl_BC(6)
     recv = bl_BC(5)
-    call MPI_Sendrecv(loc_buffU, NUMB_VAR*gr_nx*gr_ngc*gr_nz, MPI_DOUBLE_PRECISION, send, stag, &
-                      rcv_buffD, NUMB_VAR*gr_nx*gr_ngc*gr_nz, MPI_DOUBLE_PRECISION, recv, rtag, &
+    call MPI_Sendrecv(loc_buffU, NUMB_VAR*gr_nx*gr_ny*gr_ngc, MPI_DOUBLE_PRECISION, send, stag, &
+                      rcv_buffD, NUMB_VAR*gr_nx*gr_ny*gr_ngc, MPI_DOUBLE_PRECISION, recv, rtag, &
                       MPI_COMM_WORLD, stat, ierr)
 
     ! now apply domain BCs
@@ -249,7 +251,8 @@ module bc
     integer :: k0, kmax, kbeg, kend
 
     integer :: gc
-    integer :: send, recv, stag, rtag, stat, ierr, ndata
+    integer :: send, recv, stag, rtag, ierr, ndata
+    integer, dimension(MPI_STATUS_SIZE) :: stat
 
     ! for readability
     gc = gr_ngc - 1
