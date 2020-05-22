@@ -1,13 +1,55 @@
 HOST = $(shell hostname)
 
-HDF5_DIR =
-MPI_DIR  =
+HDF5_LIB =
+HDF5_INC =
 # optional
 TAU_DIR =
 
-# ylee macbook
-ifeq ($(HOST),crate)
-	HDF5_DIR = /usr/local
-	MPI_DIR  = /usr/local
-	TAU_DIR  = /Users/ylee/src/tau-2.28.1/apple
+LDFLAGS =
+
+# default is gcc
+MC = mpif90
+
+# double precision
+FFLAGS_OPT2 = -fPIC -O3 -march=native -ffast-math\
+              -fdefault-real-8 -fdefault-double-8\
+              -ffree-line-length-none
+# quadruple precision
+FFLAGS_OPT4 = -fPIC -O3 -march=native -ffast-math\
+              -freal-4-real-16 -freal-8-real-16\
+              -ffree-line-length-none
+
+# double precision
+FFLAGS_DEBUG2 = -fPIC -ggdb -g -fdefault-real-8 -fdefault-double-8\
+                -ffree-line-length-none -Wall -Wuninitialized
+# quadruple precision
+FFLAGS_DEBUG4 = -fPIC -ggdb -g -freal-4-real-16 -freal-8-real-16\
+                -ffree-line-length-none -Wall -Wuninitialized
+
+ifeq ($(HOST),crate)                             # ylee's macbook
+    HDF5_LIB = /usr/local/lib
+    HDF5_INC = /usr/local/include
+    TAU_DIR  = /Users/ylee/src/tau-2.28.1/apple
+else ifneq (,$(findstring lux-,$(HOST)))         # lux!
+    LDFLAGS += -lgfortran
+    HDF5_LIB = $(HDF5DIR)
+    HDF5_INC = $(HDF5INCLUDE)
+
+    # on lux, we use intel, since hdf5_gnu-parallel doesn't have fortran interface.
+    MC = mpiifort
+    # double precision
+    FFLAGS_OPT2 = -O3 -real-size 64 -double-size 64\
+                  -132
+    # quadruple precision
+    FFLAGS_OPT4 = -O3 -real-size 128 -double-size 128\
+                  -132
+
+    # double precision
+    FFLAGS_DEBUG2 = -g -traceback -check all -real-size 64 -double-size 64\
+                    -132
+    # quadruple precision
+    FFLAGS_DEBUG4 = -g -traceback -check all -real-size 128 -double-size 128\
+                    -132
+else
+    $(info Unrecognized system.)
 endif
