@@ -41,9 +41,9 @@ sim_gpSigdel 3.
 
 # grid variables
 gr_ngc 6
-gr_nx 10
-gr_ny 10
-gr_nz 10
+gr_nx 20
+gr_ny 20
+gr_nz 20
 
 gr_xbeg 0.
 gr_xend 20.

@@ -98,7 +98,7 @@ endif
 
 ################################################################################
 #SOME USEFUL COMMANDS
-.PHONY: clean
+.PHONY: clean opt
 
 clean:
 	rm -f *.o *.mod *~ $(EXE_FILE) Makefile.dep
