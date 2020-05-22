@@ -55,7 +55,8 @@ module bc
     integer :: j0, jmax, jbeg, jend
 
     integer :: gc
-    integer :: send, recv, stag, rtag, stat, ierr
+    integer :: send, recv, stag, rtag, ierr
+    integer, dimension(MPI_STATUS_SIZE) :: stat
 
     ! for readability
     gc = gr_ngc - 1
@@ -185,7 +186,8 @@ module bc
     integer :: j0, jmax, jbeg, jend
 
     integer :: gc
-    integer :: send, recv, stag, rtag, stat, ierr
+    integer :: send, recv, stag, rtag, ierr
+    integer, dimension(MPI_STATUS_SIZE) :: stat
 
     ! for readability
     gc = gr_ngc - 1
