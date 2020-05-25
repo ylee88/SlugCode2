@@ -34,7 +34,7 @@ subroutine soln_sfPIF4(dt)
   real, dimension(NSYS_VAR) :: divxx, divyy, divzz, divxy, divxz, divyz
   real, dimension(NSYS_VAR) :: Fxxt, Fxyt, Fxzt, Gyxt, Gyyt, Gyzt, Hzxt, Hzyt, Hzzt
   real, dimension(NSYS_VAR) :: Fxxy, Gxyy, Hxyz, Fxyz, Gyyz, Hyzz, Fxxz, Gxyz, Hxzz
-  real, dimension(NSYS_VAR) :: Fxxx, Gxxy, Hxxz, Fxyy, Gyyy, Hzyy, Fxzz, Gyzz, Hzzz
+  real, dimension(NSYS_VAR) :: Fxxx, Gxxy, Hxxz, Fxyy, Gyyy, Hyyz, Fxzz, Gyzz, Hzzz
   real, dimension(NSYS_VAR) :: divtx, divty, divtz, divtt
 
   ! for readability
@@ -146,21 +146,21 @@ subroutine soln_sfPIF4(dt)
         Gyyy = diff3(G(:,i, j-2:j+2, k), 5, gr_dy)
         Hzzz = diff3(H(:,i, j, k-2:k+2), 5, gr_dz)
 
-        Fxxy = diffxxy(F(:, i-2:i+2, j-2:j+2, k), 5, gr_dx, gr_dy)
-        Gxxy = diffxxy(G(:, i-2:i+2, j-2:j+2, k), 5, gr_dx, gr_dy)
-        Hxxz = diffxxy(H(:, i-2:i+2, j, k-2:k+2), 5, gr_dx, gr_dz)
+        Fxxy = diffxxy(F(:, i-2:i+2, j-2:j+2,       k), 5, gr_dx, gr_dy)
+        Gxxy = diffxxy(G(:, i-2:i+2, j-2:j+2,       k), 5, gr_dx, gr_dy)
+        Hxxz = diffxxy(H(:, i-2:i+2,       j, k-2:k+2), 5, gr_dx, gr_dz)
 
-        Fxyy = diffxxy(F(:, i-2:i+2, j-2:j+2, k), 5, gr_dy, gr_dx)
-        Gxyy = diffxxy(G(:, i-2:i+2, j-2:j+2, k), 5, gr_dy, gr_dx)
-        Hzyy = diffxxy(H(:, i, j-2:j+2, k-2:k+2), 5, gr_dy, gr_dz)
+        Fxyy = diffxyy(F(:, i-2:i+2, j-2:j+2,       k), 5, gr_dx, gr_dy)
+        Gxyy = diffxyy(G(:, i-2:i+2, j-2:j+2,       k), 5, gr_dx, gr_dy)
+        Hyyz = diffxxy(H(:,       i, j-2:j+2, k-2:k+2), 5, gr_dy, gr_dz)
 
-        Fxzz = diffxxy(F(:, i-2:i+2, j, k-2:k+2), 5, gr_dz, gr_dx)
-        Gyzz = diffxxy(G(:, i, j-2:j+2, k-2:k+2), 5, gr_dz, gr_dy)
-        Hyzz = diffxxy(H(:, i, j-2:j+2, k-2:k+2), 5, gr_dz, gr_dy)
+        Fxzz = diffxyy(F(:, i-2:i+2,       j, k-2:k+2), 5, gr_dx, gr_dz)
+        Gyzz = diffxyy(G(:,       i, j-2:j+2, k-2:k+2), 5, gr_dy, gr_dz)
+        Hyzz = diffxyy(H(:,       i, j-2:j+2, k-2:k+2), 5, gr_dy, gr_dz)
 
-        Fxxz = diffxxy(F(:, i-2:i+2, j, k-2:k+2), 5, gr_dx, gr_dz)
-        Gyyz = diffxxy(G(:, i, j-2:j+2, k-2:k+2), 5, gr_dy, gr_dz)
-        Hxzz = diffxxy(H(:, i-2:i+2, j, k-2:k+2), 5, gr_dz, gr_dx)
+        Fxxz = diffxxy(F(:, i-2:i+2,       j, k-2:k+2), 5, gr_dx, gr_dz)
+        Gyyz = diffxxy(G(:,       i, j-2:j+2, k-2:k+2), 5, gr_dy, gr_dz)
+        Hxzz = diffxyy(H(:, i-2:i+2,       j, k-2:k+2), 5, gr_dx, gr_dz)
 
         Fxyz = diffxyz(F(:, i-2:i+2, j-2:j+2, k-2:k+2), 5)
         Gxyz = diffxyz(G(:, i-2:i+2, j-2:j+2, k-2:k+2), 5)
@@ -168,7 +168,7 @@ subroutine soln_sfPIF4(dt)
 
 
         divxx = Fxxx + Gxxy + Hxxz
-        divyy = Fxyy + Gyyy + Hzyy
+        divyy = Fxyy + Gyyy + Hyyz
         divzz = Fxzz + Gyzz + Hzzz
 
         divxy = Fxxy + Gxyy + Hxyz
@@ -205,7 +205,7 @@ subroutine soln_sfPIF4(dt)
         Gytt = get_Dvwx(Ui, div, Uy, div, dt, YDIM) + 2.*get_Hvw(Ui, div, divy, dt, YDIM)  &
                -get_Hvw(Ui, Uy, divt, dt, YDIM) - get_Jv(Ui, divty, dt, YDIM)
         Hztt = get_Dvwx(Ui, div, Uz, div, dt, ZDIM) + 2.*get_Hvw(Ui, div, divz, dt, ZDIM)  &
-               -get_Hvw(Ui, Uy, divt, dt, ZDIM) - get_Jv(Ui, divtz, dt, ZDIM)
+               -get_Hvw(Ui, Uz, divt, dt, ZDIM) - get_Jv(Ui, divtz, dt, ZDIM)
 
         ! finalizing divtt
         divtt = Fxtt + Gytt + Hztt
