@@ -1,5 +1,10 @@
 HOST = $(shell hostname)
 
+# compiler
+# default is gcc
+COMP = gcc
+
+# HDF5 locations
 HDF5_LIB =
 HDF5_INC =
 # optional
@@ -7,36 +12,43 @@ TAU_DIR =
 
 LDFLAGS =
 
-# default is gcc
-MC = mpif90
-
-# double precision
-FFLAGS_OPT2 = -fPIC -O3 -march=native -ffast-math\
-              -fdefault-real-8 -fdefault-double-8\
-              -ffree-line-length-none
-# quadruple precision
-FFLAGS_OPT4 = -fPIC -O3 -march=native -ffast-math\
-              -freal-4-real-16 -freal-8-real-16\
-              -ffree-line-length-none
-
-# double precision
-FFLAGS_DEBUG2 = -fPIC -ggdb -g -fdefault-real-8 -fdefault-double-8\
-                -ffree-line-length-none -Wall -Wuninitialized
-# quadruple precision
-FFLAGS_DEBUG4 = -fPIC -ggdb -g -freal-4-real-16 -freal-8-real-16\
-                -ffree-line-length-none -Wall -Wuninitialized
-
 ifeq ($(HOST),crate)                             # ylee's macbook
+    COMP = gcc
     HDF5_LIB = /usr/local/lib
     HDF5_INC = /usr/local/include
     TAU_DIR  = /Users/ylee/src/tau-2.28.1/apple
 else ifneq (,$(findstring lux-,$(HOST)))         # lux!
-    LDFLAGS += -lgfortran
+    COMP = intel
     HDF5_LIB = $(HDF5DIR)
     HDF5_INC = $(HDF5INCLUDE)
+else
+    $(info Unrecognized system.)
+endif
 
-    # on lux, we use intel, since hdf5_gnu-parallel doesn't have fortran interface.
+
+# Compiler dependent flags
+ifeq ($(COMP), gcc)
+    # mpi compiler
+    MC = mpif90
+    # double precision
+    FFLAGS_OPT2 = -fPIC -O3 -march=native -ffast-math\
+                  -fdefault-real-8 -fdefault-double-8\
+                  -ffree-line-length-none
+    # quadruple precision
+    FFLAGS_OPT4 = -fPIC -O3 -march=native -ffast-math\
+                  -freal-4-real-16 -freal-8-real-16\
+                  -ffree-line-length-none
+
+    # double precision
+    FFLAGS_DEBUG2 = -fPIC -ggdb -g -fdefault-real-8 -fdefault-double-8\
+                    -ffree-line-length-none -Wall -Wuninitialized
+    # quadruple precision
+    FFLAGS_DEBUG4 = -fPIC -ggdb -g -freal-4-real-16 -freal-8-real-16\
+                    -ffree-line-length-none -Wall -Wuninitialized
+else ifeq ($(COMP), intel)
     MC = mpiifort
+    # use gfortran library for blas, lapack
+    LDFLAGS += -lgfortran
     # double precision
     FFLAGS_OPT2 = -O3 -real-size 64 -double-size 64\
                   -132
@@ -50,6 +62,8 @@ else ifneq (,$(findstring lux-,$(HOST)))         # lux!
     # quadruple precision
     FFLAGS_DEBUG4 = -g -traceback -check all -real-size 128 -double-size 128\
                     -132
-else
-    $(info Unrecognized system.)
 endif
+
+
+
+
