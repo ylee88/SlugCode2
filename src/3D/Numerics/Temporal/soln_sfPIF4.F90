@@ -67,9 +67,9 @@ subroutine soln_sfPIF4(dt)
     end do
   end do
 
-  do k = kbeg-(num_radius+1), kend+(num_radius+1)
-    do j = jbeg-(num_radius+1), jend+(num_radius+1)
-      do i = ibeg-(num_radius+1), iend+(num_radius+1)
+  do k = kbeg-(num_radius+1+2), kend+(num_radius+1+2)
+    do j = jbeg-(num_radius+1+2), jend+(num_radius+1+2)
+      do i = ibeg-(num_radius+1+2), iend+(num_radius+1+2)
         Fx = diff1(F(:, i-2:i+2, j, k), 5, gr_dx)
         Gy = diff1(G(:, i, j-2:j+2, k), 5, gr_dy)
         Hz = diff1(H(:, i, j, k-2:k+2), 5, gr_dz)
