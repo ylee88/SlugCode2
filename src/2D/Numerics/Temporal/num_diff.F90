@@ -8,30 +8,23 @@ contains
 
 
   !!!!! experimental
-  function diff1_weno(q, Nx, dir) result(f)
+  function diff1_weno(q, Nx, d) result(f)
 
     use WENO
     implicit none
 
-    integer, intent(IN) :: Nx, dir
+    integer, intent(IN) :: Nx
     real, dimension(NSYS_VAR, Nx), intent(IN) :: q
+    real, intent(IN) :: d
 
     real, dimension(NSYS_VAR) :: f
     real, dimension(3) :: smth_ind, linW, nonLinW
     real, dimension(5) :: C, cl, cm, cr
 
     real :: delta, sumW
-    integer :: i, var, k
+    integer :: var, k
 
-    select case(dir)
-    case(XDIM)
-      delta = gr_dx
-    case(YDIM)
-      delta = gr_dy
-    case DEFAULT
-      delta = 0.
-      call abort_slug("[diff1] Wrong dir value")
-    end select
+    delta = d
 
     C  = (/  1., -8.,  0.,  8., -1. /)/(12.*delta)
     cl = (/  1., -4.,  3.,  0.,  0. /)/(2.*delta)
@@ -220,7 +213,7 @@ contains
     real, dimension(NSYS_VAR, Nx, Nx), intent(IN) :: q
     real, dimension(NSYS_VAR) :: f
 
-    real :: dx1, dx2, dx2dy
+    real :: dx2dy
     integer :: i, j
 
     dx2dy = gr_dx**2*gr_dy

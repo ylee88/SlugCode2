@@ -21,8 +21,10 @@ subroutine soln_sfPIF3(dt)
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: U, F, G
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), NDIM) :: Flux   ! solution for sfPIF
 
+  real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: div_gr
+
   real, dimension(NSYS_VAR) :: Ui, Ux, Uxx, Uy, Uyy
-  real, dimension(NSYS_VAR) :: Fx, Fxy, Fxx, Gy, Gxy, Gyy
+  real, dimension(NSYS_VAR) :: Fx, Gy
   real, dimension(NSYS_VAR) :: Fxt, Gyt
   real, dimension(NSYS_VAR) :: Ft, Ftt, Gt, Gtt
   real, dimension(NSYS_VAR) :: div, divx, divy, divt
@@ -48,19 +50,24 @@ subroutine soln_sfPIF3(dt)
     end do
   end do
 
+  ! building div_gr for performance reason
+  do j = jbeg-(num_radius+1+2), jend+(num_radius+1+2)
+    do i = ibeg-(num_radius+1+2), iend+(num_radius+1+2)
+      Fx = diff1(F(:, i-2:i+2, j), 5, gr_dx)
+      Gy = diff1(G(:, i, j-2:j+2), 5, gr_dy)
+
+      div_gr(:,i,j) = Fx + Gy
+    end do
+  end do
+
   ! initialize solution vector
   Flux = 0.
-
   ! calculate time averaging fluxes
   do j = jbeg-(num_radius+1), jend+(num_radius+1)
     do i = ibeg-(num_radius+1), iend+(num_radius+1)
 
       Ui = U(:,i,j)
-
-      Fx = diff1(F(:, i-2:i+2, j), 5, gr_dx)
-      Gy = diff1(G(:, i, j-2:j+2), 5, gr_dy)
-
-      div = Fx + Gy
+      div = div_gr(:,i,j)
 
       ! second order
       Ft = -get_Jv(Ui, div, dt, XDIM)
@@ -77,16 +84,9 @@ subroutine soln_sfPIF3(dt)
       Uxx = diff2(U(:, i-2:i+2,       j), 5, gr_dx)
       Uyy = diff2(U(:,       i, j-2:j+2), 5, gr_dy)
 
-      Fxx = diff2(F(:, i-2:i+2, j), 5, gr_dx)
-      Gyy = diff2(G(:, i, j-2:j+2), 5, gr_dy)
-
-      ! cross derivatives
-      Fxy = diffxy(F(:, i-2:i+2, j-2:j+2), 5)
-      Gxy = diffxy(G(:, i-2:i+2, j-2:j+2), 5)
-
       ! building divt
-      divx = Fxx + Gxy
-      divy = Gyy + Fxy
+      divx = diff1(div_gr(:, i-2:i+2,       j), 5, gr_dx)
+      divy = diff1(div_gr(:,       i, j-2:j+2), 5, gr_dy)
 
       Fxt = -get_Hvw(Ui, Ux, div, dt, XDIM) - get_Jv(Ui, divx, dt, XDIM)
       Gyt = -get_Hvw(Ui, Uy, div, dt, YDIM) - get_Jv(Ui, divy, dt, YDIM)

@@ -24,8 +24,7 @@ subroutine soln_sfPIF4(dt)
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: div_gr
 
   real, dimension(NSYS_VAR) :: Ui, Ux, Uxx, Uy, Uyy, Uxy
-  real, dimension(NSYS_VAR) :: Fx, Fxy, Fxx, Gy, Gxy, Gyy
-  real, dimension(NSYS_VAR) :: Fxxx, Gyyy, Fxxy, Gxxy, Fxyy, Gxyy
+  real, dimension(NSYS_VAR) :: Fx, Gy
   real, dimension(NSYS_VAR) :: Fxt, Gyt, Fxxt, Gxyt, Fxyt, Gyyt, Fxtt, Gytt
   real, dimension(NSYS_VAR) :: Ft, Ftt, Fttt, Gt, Gtt, Gttt
   real, dimension(NSYS_VAR) :: div, divx, divy, divt, divtx, divty, divtt
@@ -52,29 +51,23 @@ subroutine soln_sfPIF4(dt)
     end do
   end do
 
+  ! building div_gr for performance reason
   do j = jbeg-(num_radius+1+2), jend+(num_radius+1+2)
     do i = ibeg-(num_radius+1+2), iend+(num_radius+1+2)
-
       Fx = diff1(F(:, i-2:i+2, j), 5, gr_dx)
       Gy = diff1(G(:, i, j-2:j+2), 5, gr_dy)
 
       div_gr(:,i,j) = Fx + Gy
-
     end do
   end do
 
   ! initialize solution vector
   Flux = 0.
-
   ! calculate time averaging fluxes
   do j = jbeg-(num_radius+1), jend+(num_radius+1)
     do i = ibeg-(num_radius+1), iend+(num_radius+1)
 
       Ui = U(:,i,j)
-
-      ! Fx = diff1(F(:, i-2:i+2, j), 5, gr_dx)
-      ! Gy = diff1(G(:, i, j-2:j+2), 5, gr_dy)
-
       div = div_gr(:,i,j)
 
       ! second order
@@ -92,19 +85,9 @@ subroutine soln_sfPIF4(dt)
       Uxx = diff2(U(:, i-2:i+2,       j), 5, gr_dx)
       Uyy = diff2(U(:,       i, j-2:j+2), 5, gr_dy)
 
-      ! Fxx = diff2(F(:, i-2:i+2, j), 5, gr_dx)
-      ! Gyy = diff2(G(:, i, j-2:j+2), 5, gr_dy)
-      !
-      ! ! cross derivatives
-      ! Fxy = diffxy(F(:, i-2:i+2, j-2:j+2), 5)
-      ! Gxy = diffxy(G(:, i-2:i+2, j-2:j+2), 5)
-
+      ! building divt
       divx = diff1(div_gr(:, i-2:i+2,       j), 5, gr_dx)
       divy = diff1(div_gr(:,       i, j-2:j+2), 5, gr_dy)
-
-      ! ! building divt
-      ! divx = Fxx + Gxy
-      ! divy = Gyy + Fxy
 
       Fxt = -get_Hvw(Ui, Ux, div, dt, XDIM) - get_Jv(Ui, divx, dt, XDIM)
       Gyt = -get_Hvw(Ui, Uy, div, dt, YDIM) - get_Jv(Ui, divy, dt, YDIM)
@@ -121,24 +104,11 @@ subroutine soln_sfPIF4(dt)
 
 
       ! start to building fourth order term
-      ! Fxxx = diff3(F(:,i-2:i+2, j), 5, gr_dx)
-      ! Gyyy = diff3(G(:,i, j-2:j+2), 5, gr_dy)
-      !
-      ! Fxxy = diffxxy(F(:, i-2:i+2, j-2:j+2), 5)
-      ! Gxxy = diffxxy(G(:, i-2:i+2, j-2:j+2), 5)
-      !
-      ! Fxyy = diffxyy(F(:, i-2:i+2, j-2:j+2), 5)
-      ! Gxyy = diffxyy(G(:, i-2:i+2, j-2:j+2), 5)
-
       Uxy = diffxy(U(:, i-2:i+2, j-2:j+2), 5)
 
       divxx = diff2(div_gr(:, i-2:i+2,       j), 5, gr_dx)
       divyy = diff2(div_gr(:,       i, j-2:j+2), 5, gr_dy)
       divxy = diffxy(div_gr(:, i-2:i+2, j-2:j+2), 5)
-
-      ! divxx = Fxxx + Gxxy
-      ! divyy = Fxyy + Gyyy
-      ! divxy = Fxxy + Gxyy
 
       Fxxt = -get_Dvwx(Ui, Ux, Ux, div, dt, XDIM) - get_Hvw(Ui, Uxx, div, dt, XDIM) -2.*get_Hvw(Ui, Ux, divx, dt, XDIM) &
              -get_Jv(Ui, divxx, dt, XDIM)
@@ -166,7 +136,6 @@ subroutine soln_sfPIF4(dt)
 
       Flux(:, i, j, XDIM) = Flux(:, i, j, XDIM) + dt**3/24.*Fttt(:)
       Flux(:, i, j, YDIM) = Flux(:, i, j, YDIM) + dt**3/24.*Gttt(:)
-
 
     end do
   end do

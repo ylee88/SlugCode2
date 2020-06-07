@@ -21,9 +21,10 @@ subroutine soln_sfPIF3(dt)
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), gr_imax(ZDIM)) :: U, F, G, H
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), gr_imax(ZDIM), NDIM) :: Flux   ! solution for sfPIF
 
+  real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), gr_imax(ZDIM)) :: div_gr
+
   real, dimension(NSYS_VAR) :: Ui, Ux, Uxx, Uy, Uyy, Uz, Uzz
-  real, dimension(NSYS_VAR) :: Fx, Fxx, Gy, Gyy, Hz, Hzz
-  real, dimension(NSYS_VAR) :: Fxy, Fxz, Gyx, Gyz, Hzx, Hzy
+  real, dimension(NSYS_VAR) :: Fx, Gy, Hz
   real, dimension(NSYS_VAR) :: Fxt, Gyt, Hzt
   real, dimension(NSYS_VAR) :: Ft, Ftt, Gt, Gtt, Ht, Htt
   real, dimension(NSYS_VAR) :: div, divx, divy, divz, divt
@@ -56,6 +57,18 @@ subroutine soln_sfPIF3(dt)
     end do
   end do
 
+  do k = kbeg-(num_radius+1+2), kend+(num_radius+1+2)
+    do j = jbeg-(num_radius+1+2), jend+(num_radius+1+2)
+      do i = ibeg-(num_radius+1+2), iend+(num_radius+1+2)
+        Fx = diff1(F(:, i-2:i+2, j, k), 5, gr_dx)
+        Gy = diff1(G(:, i, j-2:j+2, k), 5, gr_dy)
+        Hz = diff1(H(:, i, j, k-2:k+2), 5, gr_dz)
+
+        div_gr(:,i,j,k) = Fx + Gy + Hz
+      end do
+    end do
+  end do
+
   ! initialize solution vector
   Flux = 0.
 
@@ -65,12 +78,7 @@ subroutine soln_sfPIF3(dt)
       do i = ibeg-(num_radius+1), iend+(num_radius+1)
 
         Ui = U(:,i,j,k)
-
-        Fx = diff1(F(:, i-2:i+2, j, k), 5, gr_dx)
-        Gy = diff1(G(:, i, j-2:j+2, k), 5, gr_dy)
-        Hz = diff1(H(:, i, j, k-2:k+2), 5, gr_dz)
-
-        div = Fx + Gy + Hz
+        div = div_gr(:,i,j,k)
 
         ! second order
         Ft = -get_Jv(Ui, div, dt, XDIM)
@@ -90,22 +98,10 @@ subroutine soln_sfPIF3(dt)
         Uyy = diff2(U(:,       i, j-2:j+2,       k), 5, gr_dy)
         Uzz = diff2(U(:,       i,       j, k-2:k+2), 5, gr_dz)
 
-        Fxx = diff2(F(:, i-2:i+2,       j,       k), 5, gr_dx)
-        Gyy = diff2(G(:,       i, j-2:j+2,       k), 5, gr_dy)
-        Hzz = diff2(H(:,       i,       j, k-2:k+2), 5, gr_dz)
-
-        ! cross derivatives
-        Fxy = diffxy(F(:, i-2:i+2, j-2:j+2,       k), 5, gr_dx, gr_dy)
-        Fxz = diffxy(F(:, i-2:i+2,       j, k-2:k+2), 5, gr_dx, gr_dz)
-        Gyx = diffxy(G(:, i-2:i+2, j-2:j+2,       k), 5, gr_dy, gr_dx)
-        Gyz = diffxy(G(:,       i, j-2:j+2, k-2:k+2), 5, gr_dy, gr_dz)
-        Hzx = diffxy(H(:, i-2:i+2,       j, k-2:k+2), 5, gr_dz, gr_dx)
-        Hzy = diffxy(H(:,       i, j-2:j+2, k-2:k+2), 5, gr_dz, gr_dy)
-
         ! building divt
-        divx = Fxx + Gyx + Hzx
-        divy = Fxy + Gyy + Hzy
-        divz = Fxz + Gyz + Hzz
+        divx = diff1(div_gr(:, i-2:i+2,       j,       k), 5, gr_dx)
+        divy = diff1(div_gr(:,       i, j-2:j+2,       k), 5, gr_dy)
+        divz = diff1(div_gr(:,       i,       j, k-2:k+2), 5, gr_dz)
 
         Fxt = -get_Hvw(Ui, Ux, div, dt, XDIM) - get_Jv(Ui, divx, dt, XDIM)
         Gyt = -get_Hvw(Ui, Uy, div, dt, YDIM) - get_Jv(Ui, divy, dt, YDIM)

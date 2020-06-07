@@ -23,7 +23,6 @@ contains
     real, dimension(NSYS_VAR) :: Fr, Fl
     real :: b_jac, eps
 
-    ! b_jac = 3.8144E-6
     b_jac = 4.8062E-06
     eps =  get_eps(dt, V, b_jac)
 
@@ -43,16 +42,11 @@ contains
 
     real, dimension(NSYS_VAR) :: Fm2, Fm1, Fp1, Fp2, VpW, VmW
 
-    real :: b, eps, eps1, eps2
+    real :: b, eps1, eps2
 
-    ! b = 1.2206E-4     ! hessian
     b = 1.6065E-4
     eps1 =  get_eps(dt, V, b)
     eps2 =  get_eps(dt, W, b)
-
-    ! eps =  get_eps(dt, max(abs(V), abs(W)), b)
-    ! eps1 = eps
-    ! eps2 = eps
 
     VpW = eps1*V+eps2*W
     VmW = eps1*V-eps2*W
@@ -76,24 +70,17 @@ contains
     real, dimension(NSYS_VAR) :: Fm4, Fm3, Fm2, Fm1, Fp1, Fp2, Fp3, Fp4
     real, dimension(NSYS_VAR) :: C1, C2, C3, C4
 
-    real :: b, eps, eps1, eps2, eps3
+    real :: b, eps1, eps2, eps3
 
-    ! b = 0.00080261319800645789    ! for D
     b = 0.0005673365502470651   ! see note
     eps1 = get_eps(dt, V, b)
     eps2 = get_eps(dt, W, b)
     eps3 = get_eps(dt, X, b)
 
-    ! eps =  get_eps(dt, max(abs(V), abs(W), abs(X)), b)
-    ! eps1 = eps
-    ! eps2 = eps
-    ! eps3 = eps
-
     C1 = eps1*V+eps2*W+eps3*X
     C2 = eps1*V-eps2*W+eps3*X
     C3 = eps1*V-eps2*W-eps3*X
     C4 = eps1*V+eps2*W-eps3*X
-
 
     call cons2flux(U+C1, Fm4, dir)
     call cons2flux(U+C2, Fm3, dir)
@@ -120,8 +107,7 @@ contains
     real :: eps, tmp
 
     eps = sqrt(b)/NORM2(V)
-    tmp = min(dt**(sim_Torder-1), eps**2)  !!!! TODO: think about it
-    ! tmp = min(dt**2, eps**2)
+    tmp = min(dt**(sim_Torder-1), eps**2)
     r = sqrt(tmp)
 
   end function get_eps

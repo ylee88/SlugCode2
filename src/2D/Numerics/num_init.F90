@@ -64,9 +64,10 @@ subroutine num_init()
 
   ! check if there are sufficient guard cells.
   ! sfPIF needs more guard cells b/c num_diffs
+  ! they need two more guard cells, as we store `div` in grid.
   if (.not. sim_RK) then
-    if (num_radius + 1 + 2 > gr_ngc) then
-      print *, "With sfPIF, at least", num_radius+1+2, "guard cells are required. gr_ngc =", gr_ngc
+    if (num_radius + 1 + 2 + 2 > gr_ngc) then
+      print *, "With sfPIF, at least", num_radius+1+2+2, "guard cells are required. gr_ngc =", gr_ngc
       call abort_slug("Wrong # of guard cells")
     end if
   else
