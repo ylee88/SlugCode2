@@ -61,7 +61,7 @@ contains
   !!!!!
 
 
-  function diff1(q, Nx, dir, d) result(f)
+  function diff1(q, Nx, d) result(f)
     implicit none
 
     integer, intent(IN) :: Nx
