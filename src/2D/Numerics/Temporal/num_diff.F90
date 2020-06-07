@@ -61,26 +61,19 @@ contains
   !!!!!
 
 
-  function diff1(q, Nx, dir) result(f)
+  function diff1(q, Nx, dir, d) result(f)
     implicit none
 
-    integer, intent(IN) :: Nx, dir
+    integer, intent(IN) :: Nx
     real, dimension(NSYS_VAR, Nx), intent(IN) :: q
+    real, intent(IN) :: d
 
     real, dimension(NSYS_VAR) :: f
 
     real :: delta
     integer :: i
 
-    select case(dir)
-    case(XDIM)
-      delta = gr_dx
-    case(YDIM)
-      delta = gr_dy
-    case DEFAULT
-      delta = 0.
-      call abort_slug("[diff1] Wrong dir value")
-    end select
+    delta = d
 
     if(Nx == 3) then
       i = 2
@@ -105,26 +98,19 @@ contains
     return
   end function diff1
 
-  function diff2(q, Nx, dir) result(f)
+  function diff2(q, Nx, d) result(f)
     implicit none
 
-    integer, intent(IN) :: Nx, dir
+    integer, intent(IN) :: Nx
     real, dimension(NSYS_VAR, Nx), intent(IN) :: q
+    real, intent(IN) :: d
 
     real, dimension(NSYS_VAR) :: f
 
     real :: delta
     integer :: i
 
-    select case(dir)
-    case(XDIM)
-      delta = gr_dx
-    case(YDIM)
-      delta = gr_dy
-    case DEFAULT
-      delta = 0
-      call abort_slug("[diff2] Wrong dir value")
-    end select
+    delta = d
 
     if(Nx == 3) then
       i = 2
@@ -149,25 +135,18 @@ contains
     return
   end function diff2
 
-  function diff3(q, Nx, dir) result(f)
+  function diff3(q, Nx, d) result(f)
     implicit none
 
-    integer, intent(IN) :: Nx, dir
+    integer, intent(IN) :: Nx
+    real, intent(IN) :: d
     real, dimension(NSYS_VAR, Nx), intent(IN) :: q
     real, dimension(NSYS_VAR) :: f
 
     real :: delta
     integer :: i
 
-    select case(dir)
-    case(XDIM)
-      delta = gr_dx
-    case(YDIM)
-      delta = gr_dy
-    case DEFAULT
-      delta = 0.
-      call abort_slug("[diff3] Wrong dir value")
-    end select
+    delta = d
 
     if(Nx == 5) then
       i = 3

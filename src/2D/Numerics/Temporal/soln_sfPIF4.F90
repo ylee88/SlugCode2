@@ -2,9 +2,10 @@ subroutine soln_sfPIF4(dt)
 
 #include "definition.h"
 
-  use grid_data, only: gr_V,           &
-                       gr_i0, gr_imax, &
-                       gr_ibeg, gr_iend
+  use grid_data, only: gr_V,             &
+                       gr_i0, gr_imax,   &
+                       gr_ibeg, gr_iend, &
+                       gr_dx, gr_dy
   use num_data, only: num_radius
   use primconsflux
   use sfPIF
@@ -19,6 +20,8 @@ subroutine soln_sfPIF4(dt)
   real, dimension(NUMB_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: V
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: U, F, G
   real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM), NDIM) :: Flux   ! solution for sfPIF
+
+  real, dimension(NSYS_VAR, gr_imax(XDIM), gr_imax(YDIM)) :: div_gr
 
   real, dimension(NSYS_VAR) :: Ui, Ux, Uxx, Uy, Uyy, Uxy
   real, dimension(NSYS_VAR) :: Fx, Fxy, Fxx, Gy, Gxy, Gyy
@@ -49,6 +52,17 @@ subroutine soln_sfPIF4(dt)
     end do
   end do
 
+  do j = jbeg-(num_radius+1+2), jend+(num_radius+1+2)
+    do i = ibeg-(num_radius+1+2), iend+(num_radius+1+2)
+
+      Fx = diff1(F(:, i-2:i+2, j), 5, gr_dx)
+      Gy = diff1(G(:, i, j-2:j+2), 5, gr_dy)
+
+      div_gr(:,i,j) = Fx + Gy
+
+    end do
+  end do
+
   ! initialize solution vector
   Flux = 0.
 
@@ -58,10 +72,10 @@ subroutine soln_sfPIF4(dt)
 
       Ui = U(:,i,j)
 
-      Fx = diff1(F(:, i-2:i+2, j), 5, XDIM)
-      Gy = diff1(G(:, i, j-2:j+2), 5, YDIM)
+      ! Fx = diff1(F(:, i-2:i+2, j), 5, gr_dx)
+      ! Gy = diff1(G(:, i, j-2:j+2), 5, gr_dy)
 
-      div = Fx + Gy
+      div = div_gr(:,i,j)
 
       ! second order
       Ft = -get_Jv(Ui, div, dt, XDIM)
@@ -72,22 +86,25 @@ subroutine soln_sfPIF4(dt)
 
 
       ! start to building third order term
-      Ux = diff1(U(:, i-2:i+2,       j), 5, XDIM)
-      Uy = diff1(U(:,       i, j-2:j+2), 5, YDIM)
+      Ux = diff1(U(:, i-2:i+2,       j), 5, gr_dx)
+      Uy = diff1(U(:,       i, j-2:j+2), 5, gr_dy)
 
-      Uxx = diff2(U(:, i-2:i+2,       j), 5, XDIM)
-      Uyy = diff2(U(:,       i, j-2:j+2), 5, YDIM)
+      Uxx = diff2(U(:, i-2:i+2,       j), 5, gr_dx)
+      Uyy = diff2(U(:,       i, j-2:j+2), 5, gr_dy)
 
-      Fxx = diff2(F(:, i-2:i+2, j), 5, XDIM)
-      Gyy = diff2(G(:, i, j-2:j+2), 5, YDIM)
+      ! Fxx = diff2(F(:, i-2:i+2, j), 5, gr_dx)
+      ! Gyy = diff2(G(:, i, j-2:j+2), 5, gr_dy)
+      !
+      ! ! cross derivatives
+      ! Fxy = diffxy(F(:, i-2:i+2, j-2:j+2), 5)
+      ! Gxy = diffxy(G(:, i-2:i+2, j-2:j+2), 5)
 
-      ! cross derivatives
-      Fxy = diffxy(F(:, i-2:i+2, j-2:j+2), 5)
-      Gxy = diffxy(G(:, i-2:i+2, j-2:j+2), 5)
+      divx = diff1(div_gr(:, i-2:i+2,       j), 5, gr_dx)
+      divy = diff1(div_gr(:,       i, j-2:j+2), 5, gr_dy)
 
-      ! building divt
-      divx = Fxx + Gxy
-      divy = Gyy + Fxy
+      ! ! building divt
+      ! divx = Fxx + Gxy
+      ! divy = Gyy + Fxy
 
       Fxt = -get_Hvw(Ui, Ux, div, dt, XDIM) - get_Jv(Ui, divx, dt, XDIM)
       Gyt = -get_Hvw(Ui, Uy, div, dt, YDIM) - get_Jv(Ui, divy, dt, YDIM)
@@ -104,20 +121,24 @@ subroutine soln_sfPIF4(dt)
 
 
       ! start to building fourth order term
-      Fxxx = diff3(F(:,i-2:i+2, j), 5, XDIM)
-      Gyyy = diff3(G(:,i, j-2:j+2), 5, YDIM)
-
-      Fxxy = diffxxy(F(:, i-2:i+2, j-2:j+2), 5)
-      Gxxy = diffxxy(G(:, i-2:i+2, j-2:j+2), 5)
-
-      Fxyy = diffxyy(F(:, i-2:i+2, j-2:j+2), 5)
-      Gxyy = diffxyy(G(:, i-2:i+2, j-2:j+2), 5)
+      ! Fxxx = diff3(F(:,i-2:i+2, j), 5, gr_dx)
+      ! Gyyy = diff3(G(:,i, j-2:j+2), 5, gr_dy)
+      !
+      ! Fxxy = diffxxy(F(:, i-2:i+2, j-2:j+2), 5)
+      ! Gxxy = diffxxy(G(:, i-2:i+2, j-2:j+2), 5)
+      !
+      ! Fxyy = diffxyy(F(:, i-2:i+2, j-2:j+2), 5)
+      ! Gxyy = diffxyy(G(:, i-2:i+2, j-2:j+2), 5)
 
       Uxy = diffxy(U(:, i-2:i+2, j-2:j+2), 5)
 
-      divxx = Fxxx + Gxxy
-      divyy = Fxyy + Gyyy
-      divxy = Fxxy + Gxyy
+      divxx = diff2(div_gr(:, i-2:i+2,       j), 5, gr_dx)
+      divyy = diff2(div_gr(:,       i, j-2:j+2), 5, gr_dy)
+      divxy = diffxy(div_gr(:, i-2:i+2, j-2:j+2), 5)
+
+      ! divxx = Fxxx + Gxxy
+      ! divyy = Fxyy + Gyyy
+      ! divxy = Fxxy + Gxyy
 
       Fxxt = -get_Dvwx(Ui, Ux, Ux, div, dt, XDIM) - get_Hvw(Ui, Uxx, div, dt, XDIM) -2.*get_Hvw(Ui, Ux, divx, dt, XDIM) &
              -get_Jv(Ui, divxx, dt, XDIM)

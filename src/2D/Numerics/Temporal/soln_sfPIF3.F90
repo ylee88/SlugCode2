@@ -2,9 +2,10 @@ subroutine soln_sfPIF3(dt)
 
 #include "definition.h"
 
-  use grid_data, only: gr_V,           &
-                       gr_i0, gr_imax, &
-                       gr_ibeg, gr_iend
+  use grid_data, only: gr_V,             &
+                       gr_i0, gr_imax,   &
+                       gr_ibeg, gr_iend, &
+                       gr_dx, gr_dy
   use num_data, only: num_radius
   use primconsflux
   use sfPIF
@@ -56,8 +57,8 @@ subroutine soln_sfPIF3(dt)
 
       Ui = U(:,i,j)
 
-      Fx = diff1(F(:, i-2:i+2, j), 5, XDIM)
-      Gy = diff1(G(:, i, j-2:j+2), 5, YDIM)
+      Fx = diff1(F(:, i-2:i+2, j), 5, gr_dx)
+      Gy = diff1(G(:, i, j-2:j+2), 5, gr_dy)
 
       div = Fx + Gy
 
@@ -70,14 +71,14 @@ subroutine soln_sfPIF3(dt)
 
 
       ! start to building third order term
-      Ux = diff1(U(:, i-2:i+2,       j), 5, XDIM)
-      Uy = diff1(U(:,       i, j-2:j+2), 5, YDIM)
+      Ux = diff1(U(:, i-2:i+2,       j), 5, gr_dx)
+      Uy = diff1(U(:,       i, j-2:j+2), 5, gr_dy)
 
-      Uxx = diff2(U(:, i-2:i+2,       j), 5, XDIM)
-      Uyy = diff2(U(:,       i, j-2:j+2), 5, YDIM)
+      Uxx = diff2(U(:, i-2:i+2,       j), 5, gr_dx)
+      Uyy = diff2(U(:,       i, j-2:j+2), 5, gr_dy)
 
-      Fxx = diff2(F(:, i-2:i+2, j), 5, XDIM)
-      Gyy = diff2(G(:, i, j-2:j+2), 5, YDIM)
+      Fxx = diff2(F(:, i-2:i+2, j), 5, gr_dx)
+      Gyy = diff2(G(:, i, j-2:j+2), 5, gr_dy)
 
       ! cross derivatives
       Fxy = diffxy(F(:, i-2:i+2, j-2:j+2), 5)
