@@ -22,6 +22,9 @@ program SlugCode
   ioTimeFreqCounter = 0
   dt_init = 2.e-10
 
+  ! for DMR bc, we need current time
+  sim_t = t
+
   ! read init file as an argument
   call GETARG(1, init_file_name)
   if (init_file_name == '') then
@@ -80,6 +83,10 @@ program SlugCode
     elseif ( abs(t - sim_tmax) <= dt ) then
       dt = abs(t - sim_tmax)
     end if
+
+    ! save current time to global variable,
+    ! just for DMR
+    sim_t = t
 
     ! do high order intp/recon/temporal
     call soln_numeric(dt)

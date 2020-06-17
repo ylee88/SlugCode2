@@ -41,9 +41,9 @@ subroutine sim_initBlock()
   dr2 = (3.5*MIN(gr_dx, gr_dy))**2
   E = 1.
 
+  !for DMR
   rt3 = sqrt(3.)
   xmin = 1./6.
-  x0 = xmin + 1./rt3
 
   do j = j0, jmax
     yy = gr_yCoord(j)
@@ -66,10 +66,8 @@ subroutine sim_initBlock()
         gr_V(PRES_VAR,i,j) = gr_V(DENS_VAR,i,j)*T
 
       elseif (sim_icType == 'DMR') then
-        x = xx
-        y = yy
-        ymin = (x - xmin)*rt3
-        if (y > ymin) then
+        ymin = (xx - xmin)*rt3
+        if (yy > ymin) then
           !in the shock region
           gr_V(DENS_VAR,i,j) = 8.
           gr_V(VELX_VAR,i,j) = 7.1447096

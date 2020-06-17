@@ -2,13 +2,16 @@ module bc
 
 #include "definition.h"
 
-  use grid_data, only: gr_i0,   &
-                       gr_imax, &
-                       gr_ibeg, &
-                       gr_iend, &
-                       gr_nx,   &
-                       gr_ny,   &
-                       gr_ngc
+  use grid_data, only: gr_i0,     &
+                       gr_imax,   &
+                       gr_ibeg,   &
+                       gr_iend,   &
+                       gr_nx,     &
+                       gr_ny,     &
+                       gr_ngc,    &
+                       gr_xCoord, &
+                       gr_yCoord, &
+                       gr_xend
 
   use block_data, only: bl_BC,       &
                         bl_cornerBC, &
@@ -20,7 +23,8 @@ module bc
 
   use sim_data,  only: sim_bcTypex,  &
                        sim_bcTypey,  &
-                       sim_cornerBC
+                       sim_cornerBC, &
+                       sim_t
   use mpi
 
   implicit none
@@ -57,6 +61,13 @@ module bc
     integer :: gc
     integer :: send, recv, stag, rtag, ierr
     integer, dimension(MPI_STATUS_SIZE) :: stat
+
+    !! for DMR
+    real :: xmin, ymax, rt3, xx, yy
+    rt3 = sqrt(3.)
+    ymax = gr_xend(YDIM)
+    xmin = 1./6. + 10.*sim_t/(.5*rt3) + ymax/rt3
+    !!
 
     ! for readability
     gc = gr_ngc - 1
@@ -109,41 +120,67 @@ module bc
 
     ! now apply domain BCs
     if (bl_i == 1) then          ! left
-      if (sim_bcTypex == "outflow") then
+      if (sim_bcTypeX == "outflow") then
         do i = 1, gr_ngc
           rcv_buffL(:,i,:) = loc_buffL(:,1,:)
         end do
-      else if (sim_bcTypex == "reflect") then
+      else if (sim_bcTypeX == "reflect") then
         do i = 1, gr_ngc
           rcv_buffL(:,i,:) = loc_buffL(:,gr_ngc-i+1,:)
         end do
         rcv_buffL(VELX_VAR,:,:) = -rcv_buffL(VELX_VAR,:,:)
+      else if (sim_bcTypeX == "DMR") then
+        ! do nothing; just copy ghost cell's inform
+        rcv_buffL(:,:,:) = V(:, i0:i0+gc, jbeg:jend)
       end if
     end if
 
     if (bl_i == bl_iProcs) then  ! right
-      if (sim_bcTypex == "outflow") then
+      if (sim_bcTypeX == "outflow") then
         do i = 1, gr_ngc
           rcv_buffR(:,i,:) = loc_buffR(:,gr_ngc,:)
         end do
-      else if (sim_bcTypex == "reflect") then
+      else if (sim_bcTypeX == "reflect") then
         do i = 1, gr_ngc
           rcv_buffR(:,i,:) = loc_buffR(:,gr_ngc-i+1,:)
         end do
         rcv_buffR(VELX_VAR,:,:) = -rcv_buffR(VELX_VAR,:,:)
+      else if (sim_bcTypeX == "DMR") then
+        ! do outflow
+        do i = 1, gr_ngc
+          rcv_buffR(:,i,:) = loc_buffR(:,gr_ngc,:)
+        end do
       end if
     end if
 
     if (bl_j == 1) then          ! bottom
-      if (sim_bcTypey == "outflow") then
+      if (sim_bcTypeY == "outflow") then
         do j = 1, gr_ngc
           rcv_buffB(:,:,j) = loc_buffB(:,:,1)
         end do
-      else if (sim_bcTypey == "reflect") then
+      else if (sim_bcTypeY == "reflect") then
         do j = 1, gr_ngc
           rcv_buffB(:,:,j) = loc_buffB(:,:,gr_ngc-j+1)
         end do
         rcv_buffB(VELY_VAR,:,:) = -rcv_buffB(VELY_VAR,:,:)
+      else if (sim_bcTypeY == "DMR") then
+        rcv_buffB(:,:,:) = loc_buffB(:,:,:)   ! copy EOS data
+        do i = 1, gr_nx
+          xx = gr_xCoord(i+gr_ngc)
+          if (xx > 1./6.) then
+            ! reflect
+            do j = 1, gr_ngc
+              rcv_buffB(:,i,j) = loc_buffB(:,i,gr_ngc-j+1)
+            end do
+            rcv_buffB(VELY_VAR,i,:) = -rcv_buffB(VELY_VAR,i,:)
+          else
+            ! inside shock
+            rcv_buffB(DENS_VAR,i,:) = 8.
+            rcv_buffB(VELX_VAR,i,:) = 7.1447096
+            rcv_buffB(VELY_VAR,i,:) = -4.125
+            rcv_buffB(PRES_VAR,i,:) = 116.5
+          end if
+        end do ! end DMR
       end if
     end if
 
@@ -157,6 +194,27 @@ module bc
           rcv_buffT(:,:,j) = loc_buffT(:,:,gr_ngc-j+1)
         end do
         rcv_buffT(VELY_VAR,:,:) = -rcv_buffT(VELY_VAR,:,:)
+      else if (sim_bcTypeY == "DMR") then
+        rcv_buffT(:,:,:) = loc_buffT(:,:,:)   ! copy EOS data
+        do i = 1, gr_nx
+          do j = 1, gr_ngc
+            xx = gr_xCoord(i+gr_ngc)
+            yy = gr_yCoord(j+jend)
+            if (yy-ymax > (xx-xmin)*rt3) then
+              ! still in shock, use left state
+              rcv_buffT(DENS_VAR,i,j) = 8.
+              rcv_buffT(VELX_VAR,i,j) = 7.1447096
+              rcv_buffT(VELY_VAR,i,j) = -4.125
+              rcv_buffT(PRES_VAR,i,j) = 116.5
+            else
+              ! outside of shock
+              rcv_buffT(DENS_VAR,i,j) = 1.4
+              rcv_buffT(VELX_VAR,i,j) = 0.
+              rcv_buffT(VELY_VAR,i,j) = 0.
+              rcv_buffT(PRES_VAR,i,j) = 1.
+            end if
+          end do
+        end do ! end DMR
       end if
     end if
 
@@ -188,6 +246,13 @@ module bc
     integer :: gc
     integer :: send, recv, stag, rtag, ierr
     integer, dimension(MPI_STATUS_SIZE) :: stat
+
+    !! for DMR
+    real :: xmin, ymax, rt3, xx, yy
+    rt3 = sqrt(3.)
+    ymax = gr_xend(YDIM)
+    xmin = 1./6. + 10.*sim_t/(.5*rt3) + ymax/rt3
+    !!
 
     ! for readability
     gc = gr_ngc - 1
@@ -254,6 +319,19 @@ module bc
         end do
         rcv_buffTL(VELX_VAR,:,:) = -rcv_buffTL(VELX_VAR,:,:)
         rcv_buffBL(VELX_VAR,:,:) = -rcv_buffBL(VELX_VAR,:,:)
+      else if (sim_bcTypeX == "DMR") then
+        rcv_buffTL(:,:,:) = loc_buffTL(:,:,:)   ! copy EOS data
+        rcv_buffBL(:,:,:) = loc_buffBL(:,:,:)   ! copy EOS data
+        ! inflow
+        rcv_buffTL(DENS_VAR,:,:) = 8.
+        rcv_buffTL(VELX_VAR,:,:) = 7.1447096
+        rcv_buffTL(VELY_VAR,:,:) = -4.125
+        rcv_buffTL(PRES_VAR,:,:) = 116.5
+
+        rcv_buffBL(DENS_VAR,:,:) = 8.
+        rcv_buffBL(VELX_VAR,:,:) = 7.1447096
+        rcv_buffBL(VELY_VAR,:,:) = -4.125
+        rcv_buffBL(PRES_VAR,:,:) = 116.5
       end if  ! sim_bcTypeX
     end if    ! bl_i
 
@@ -272,6 +350,12 @@ module bc
         end do
         rcv_buffTR(VELX_VAR,:,:) = -rcv_buffTR(VELX_VAR,:,:)
         rcv_buffBR(VELX_VAR,:,:) = -rcv_buffBR(VELX_VAR,:,:)
+      else if (sim_bcTypeX == "DMR") then
+        ! outflow
+        do i = 1, gr_ngc
+          rcv_buffTR(:,i,:) = loc_buffTR(:,gr_ngc,:)
+          rcv_buffBR(:,i,:) = loc_buffBR(:,gr_ngc,:)
+        end do
       end if  ! sim_bcTypeX
     end if    ! bl_i
 
@@ -290,6 +374,39 @@ module bc
         end do
         rcv_buffBL(VELY_VAR,:,:) = -rcv_buffBL(VELY_VAR,:,:)
         rcv_buffBR(VELY_VAR,:,:) = -rcv_buffBR(VELY_VAR,:,:)
+      else if (sim_bcTypeY == "DMR") then
+        rcv_buffBL(:,:,:) = loc_buffBL(:,:,:)   ! copy EOS data
+        rcv_buffBR(:,:,:) = loc_buffBR(:,:,:)   ! copy EOS data
+        do i = 1, gr_ngc
+          ! BL
+          if(gr_xCoord(i) > 1./6.) then
+            ! do reflect
+            do j = 1, gr_ngc
+              rcv_buffBL(:,i,j) = loc_buffBL(:,i,gr_ngc-j+1)
+            end do
+            rcv_buffBL(VELY_VAR,:,:) = -rcv_buffBL(VELY_VAR,:,:)
+          else
+            ! inside shock
+            rcv_buffBL(DENS_VAR,i-gr_ngc,:) = 8.
+            rcv_buffBL(VELX_VAR,i-gr_ngc,:) = 7.1447096
+            rcv_buffBL(VELY_VAR,i-gr_ngc,:) = -4.125
+            rcv_buffBL(PRES_VAR,i-gr_ngc,:) = 116.5
+          end if
+          ! BR
+          if(gr_xCoord(iend+i) > 1./6.) then
+            ! do reflect
+            do j = 1, gr_ngc
+              rcv_buffBR(:,i,j) = loc_buffBR(:,i,gr_ngc-j+1)
+            end do
+            rcv_buffBR(VELY_VAR,:,:) = -rcv_buffBR(VELY_VAR,:,:)
+          else
+            ! inside shock
+            rcv_buffBR(DENS_VAR,i-gr_ngc,:) = 8.
+            rcv_buffBR(VELX_VAR,i-gr_ngc,:) = 7.1447096
+            rcv_buffBR(VELY_VAR,i-gr_ngc,:) = -4.125
+            rcv_buffBR(PRES_VAR,i-gr_ngc,:) = 116.5
+          end if
+        end do  ! DMR
       end if  ! sim_bcTypeY
     end if    ! bl_j
 
@@ -308,6 +425,45 @@ module bc
         end do
         rcv_buffTL(VELY_VAR,:,:) = -rcv_buffTL(VELY_VAR,:,:)
         rcv_buffTR(VELY_VAR,:,:) = -rcv_buffTR(VELY_VAR,:,:)
+      else if (sim_bcTypeY == "DMR") then
+        rcv_buffTL(:,:,:) = loc_buffTL(:,:,:)   ! copy EOS data
+        rcv_buffTR(:,:,:) = loc_buffTR(:,:,:)   ! copy EOS data
+        do i = 1, gr_ngc
+          do j = 1, gr_ngc
+            ! TL
+            xx = gr_xCoord(i)
+            yy = gr_yCoord(j+jend)
+            if (yy-ymax > (xx-xmin)*rt3) then
+              ! still in shock, use left state
+              rcv_buffTL(DENS_VAR,i-gr_ngc,j) = 8.
+              rcv_buffTL(VELX_VAR,i-gr_ngc,j) = 7.1447096
+              rcv_buffTL(VELY_VAR,i-gr_ngc,j) = -4.125
+              rcv_buffTL(PRES_VAR,i-gr_ngc,j) = 116.5
+            else
+              ! outside of shock
+              rcv_buffTL(DENS_VAR,i-gr_ngc,j) = 1.4
+              rcv_buffTL(VELX_VAR,i-gr_ngc,j) = 0.
+              rcv_buffTL(VELY_VAR,i-gr_ngc,j) = 0.
+              rcv_buffTL(PRES_VAR,i-gr_ngc,j) = 1.
+            end if
+            ! TR
+            xx = gr_xCoord(i+iend)
+            yy = gr_yCoord(j+jend)
+            if (yy-ymax > (xx-xmin)*rt3) then
+              ! still in shock, use left state
+              rcv_buffTR(DENS_VAR,i-gr_ngc,j) = 8.
+              rcv_buffTR(VELX_VAR,i-gr_ngc,j) = 7.1447096
+              rcv_buffTR(VELY_VAR,i-gr_ngc,j) = -4.125
+              rcv_buffTR(PRES_VAR,i-gr_ngc,j) = 116.5
+            else
+              ! outside of shock
+              rcv_buffTR(DENS_VAR,i-gr_ngc,j) = 1.4
+              rcv_buffTR(VELX_VAR,i-gr_ngc,j) = 0.
+              rcv_buffTR(VELY_VAR,i-gr_ngc,j) = 0.
+              rcv_buffTR(PRES_VAR,i-gr_ngc,j) = 1.
+            end if
+          end do
+        end do ! end DMR
       end if  ! sim_bcTypeY
     end if    ! bl_j
 

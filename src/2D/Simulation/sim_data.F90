@@ -31,4 +31,7 @@ module sim_data
   integer, save :: sim_gpRadii
   real,    save :: sim_gpEll, sim_gpEldel, sim_gpSigdel
 
+  !! this is only for DMR BC
+  real :: sim_t
+
 end module sim_data
