@@ -49,7 +49,7 @@ sim_pIO .true.
 then, `SlugCode2` will write HDF5 format output in parallel.
 This requires the HDF5 library with parallel support.
 
-In order to read the data, you can use a dedicated Python module, [`slugger`](python/README.md).
+In order to read the data, you can use a dedicated Python module, [`slugger`](python/).
 This module reads the data from `SlugCode2` and returns `numpy` array:
 ```Python console
 >>> import slugger as slug
