@@ -60,7 +60,7 @@ program SlugCode
   end if
 
   ! write initial condition
-  call io_writeOutput(t, nStep, ioCounter, 0.)
+  call io_writeOutput(init_file_name, t, nStep, ioCounter, 0.)
 
   ! call cpu_time(start)
   start = MPI_Wtime()
@@ -109,7 +109,7 @@ program SlugCode
       ioCounter = ioCounter + 1
       ioTimeFreqCounter = ioTimeFreqCounter + 1
       finish = MPI_Wtime()
-      call io_writeOutput(t, nStep, ioCounter, finish-start)
+      call io_writeOutput(init_file_name, t, nStep, ioCounter, finish-start)
     endif
 
     if (sim_ioNfreq > 0) then
@@ -124,7 +124,7 @@ program SlugCode
         end if
         ioCounter = ioCounter + 1
         finish = MPI_Wtime()
-        call io_writeOutput(t, nStep, ioCounter, finish-start)
+        call io_writeOutput(init_file_name, t, nStep, ioCounter, finish-start)
       endif
     endif
 
@@ -153,7 +153,7 @@ program SlugCode
     write(*,*)''
   end if
   finish = MPI_Wtime()
-  call io_writeOutput(t, nStep,ioCounter+1, finish-start)
+  call io_writeOutput(init_file_name, t, nStep,ioCounter+1, finish-start)
 
   !! finalize and deallocate memories
   call grid_finalize()
