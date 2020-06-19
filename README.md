@@ -77,7 +77,7 @@ plotter/bin/plot2d cont vortex_10001.slug   # this will print density contour ma
 
 Also, you can use [visit](https://wci.llnl.gov/simulation/computer-codes/visit)
 for more serious plottings.
-Make sure you installed [SlugCode2-extension](plotter/visit/SlugCode/README.md) first.
+Make sure you installed [SlugCode2-extension](plotter/visit/SlugCode/) first.
 
 ## Supported schemes
 
