@@ -24,24 +24,25 @@ module io
 
 contains
 
-  subroutine io_writeOutput(t, nstep, ioCounter, eTime)
+  subroutine io_writeOutput(init_file_name, t, nstep, ioCounter, eTime)
 
     implicit none
+    character(len=MAX_STRING_LENGTH) :: init_file_name
     real, intent(IN) :: t, eTime
     integer, intent(IN) :: nstep, ioCounter
 
     if (sim_hdf5) then
       if (sim_pIO) then
-        call io_writeHDF5_p(t, nstep, ioCounter, eTime)
+        call io_writeHDF5_p(init_file_name, t, nstep, ioCounter, eTime)
       else
-        call io_writeHDF5(t, nstep, ioCounter, eTime)
+        call io_writeHDF5(init_file_name, t, nstep, ioCounter, eTime)
       end if
     else
       call io_writeASCII(t, nstep, ioCounter)
     end if
   end subroutine io_writeOutput
 
-  subroutine io_writeHDF5_p(t, nstep, ioCounter, eTime)
+  subroutine io_writeHDF5_p(init_file_name, t, nstep, ioCounter, eTime)
 
     use HDF5
     use mpi, ONLY: MPI_COMM_WORLD, MPI_INFO_NULL
@@ -52,6 +53,7 @@ contains
     character(len=5)  :: cCounter
     character(len=50) :: dset_prim, dset_x, dset_y, dset_z
 
+    character(len=MAX_STRING_LENGTH) :: init_file_name
     real,    intent(IN) :: t, eTime
     integer, intent(IN) :: nstep, ioCounter
 
@@ -63,6 +65,11 @@ contains
     integer(HSIZE_T), dimension(4) :: dims_V, glb_dims_V, hs_start, hs_stride, hs_count
     integer(HID_T) :: file_id, dspace_id, dset_id, mspace_id
     integer(HID_T) :: plist_file, plist_dset, plist_dxfer
+
+    character(len=MAX_STRING_LENGTH), dimension(:), allocatable :: init_params
+    integer(HID_T), dimension(1) :: dims_txt
+    integer(HID_T) :: strlen, strtype
+    integer :: file_length
 
     integer :: i, j, k, comm, info, error
     integer :: rank_V, rank_XYZ, rankT
@@ -209,6 +216,26 @@ contains
       call H5Dclose_f(dset_id,error)
       call H5Sclose_f(dspace_id,error)
 
+
+      !dataspace for init parameters
+      !allocate contents of init_file_name to init_params
+      call text_to_array(init_file_name, file_length, init_params)
+      ! extend string datatype
+      strlen = MAX_STRING_LENGTH
+      call H5Tcopy_f(H5T_FORTRAN_S1, strtype, error)
+      call H5Tset_size_f(strtype, strlen, error)
+      !datatspace
+      dims_txt = (/ file_length /)
+      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
+      call h5Dcreate_f(file_id, 'init_params', strtype, dspace_id, dset_id, error)
+      !write data
+      call h5Dwrite_f(dset_id, strtype, init_params, dims_txt, error)
+
+      call H5Tclose_f(strtype,error)
+      call H5Dclose_f(dset_id,error)
+      call H5Sclose_f(dspace_id,error)
+      deallocate(init_params)
+
     ! end if
 
     ! done!
@@ -224,7 +251,7 @@ contains
 
 
 
-  subroutine io_writeHDF5(t, nstep, ioCounter, eTime)
+  subroutine io_writeHDF5(init_file_name, t, nstep, ioCounter, eTime)
 
     ! TODO: I should rewrite this using MPI communications
 
@@ -232,6 +259,7 @@ contains
 
     implicit none
 
+    character(len=MAX_STRING_LENGTH) :: init_file_name
     real, intent(IN) :: t, eTime
     integer, intent(IN) :: nstep, ioCounter
 
@@ -250,6 +278,11 @@ contains
     integer           :: error, rank_V, rank_XYZ, rankT
     integer(HSIZE_T), dimension(1) :: dimT
     integer(HSIZE_T),allocatable, dimension(:) :: dims_V, dims_XYZ, dims_B
+
+    character(len=MAX_STRING_LENGTH), dimension(:), allocatable :: init_params
+    integer(HID_T), dimension(1) :: dims_txt
+    integer(HID_T) :: strlen, strtype
+    integer :: file_length
 
     integer:: ierr, tag, stat
 
@@ -383,6 +416,27 @@ contains
       call h5dclose_f(dset_id,error)
       call h5sclose_f(dspace_id,error)
 
+
+      !dataspace for init parameters
+      !allocate contents of init_file_name to init_params
+      call text_to_array(init_file_name, file_length, init_params)
+      ! extend string datatype
+      strlen = MAX_STRING_LENGTH
+      call H5Tcopy_f(H5T_FORTRAN_S1, strtype, error)
+      call H5Tset_size_f(strtype, strlen, error)
+      !datatspace
+      dims_txt = (/ file_length /)
+      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
+      call h5Dcreate_f(file_id, 'init_params', strtype, dspace_id, dset_id, error)
+      !write data
+      call h5Dwrite_f(dset_id, strtype, init_params, dims_txt, error)
+
+      call H5Tclose_f(strtype,error)
+      call H5Dclose_f(dset_id,error)
+      call H5Sclose_f(dspace_id,error)
+      deallocate(init_params)
+
+
       !close hdf5 file and interface
       call h5fclose_f(file_id,error)
       call h5close_f(error)
@@ -493,6 +547,46 @@ contains
 920 format(1x,f16.8,1x,f16.8,1x,f16.8,1x,NUMB_VAR f32.16)
 
   end subroutine io_writeASCII
+
+
+
+
+  ! miscs
+  subroutine text_to_array(ofile, line_num, text_array)
+    ! open text file, store the contents into string array
+
+    implicit none
+
+    character(len=MAX_STRING_LENGTH), intent(IN) :: ofile
+    character(len=MAX_STRING_LENGTH), allocatable, dimension(:), intent(INOUT) :: text_array
+    integer, intent(OUT) :: line_num
+
+    character(len=MAX_STRING_LENGTH) :: ctmp
+    integer :: i, uid, ierr
+
+    uid = 50
+
+    open(unit=uid, file=ofile, status='unknown')
+
+    ! get line number
+    ierr = 0
+    line_num = 0
+    do while(ierr == 0)
+      line_num = line_num + 1
+      read(uid, '(A)', iostat=ierr) ctmp
+    end do
+    line_num = line_num - 1
+
+    allocate(text_array(line_num))
+
+    rewind(uid)
+    do i = 1, line_num
+      read(uid, '(A)') text_array(i)
+    end do
+
+    close(uid)
+
+  end subroutine text_to_array
 
 
 end module io
