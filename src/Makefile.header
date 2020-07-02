@@ -31,11 +31,11 @@ ifeq ($(COMP), gcc)
     # mpi compiler
     MC = mpif90
     # double precision
-    FFLAGS_OPT2 = -fPIC -O3 -march=native -ffast-math\
+    FFLAGS_OPT2 = -fPIC -O3 -march=native\
                   -fdefault-real-8 -fdefault-double-8\
                   -ffree-line-length-none
     # quadruple precision
-    FFLAGS_OPT4 = -fPIC -O3 -march=native -ffast-math\
+    FFLAGS_OPT4 = -fPIC -O3 -march=native\
                   -freal-4-real-16 -freal-8-real-16\
                   -ffree-line-length-none
 
