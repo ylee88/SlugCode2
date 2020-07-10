@@ -15,7 +15,8 @@
 #define MAGY_VAR 6
 #define MAGZ_VAR 7
 #define PRES_VAR 8
-#define NUMB_VAR 8
+#define GAMC_VAR 9
+#define NUMB_VAR 9
 
 ! conservative variables
 #define MOMX_VAR 2
