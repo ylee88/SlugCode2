@@ -11,9 +11,9 @@
 #define VELX_VAR 2
 #define VELY_VAR 3
 #define VELZ_VAR 4
-#define MEGX_VAR 5
-#define MEGY_VAR 6
-#define MEGZ_VAR 7
+#define MAGX_VAR 5
+#define MAGY_VAR 6
+#define MAGZ_VAR 7
 #define PRES_VAR 8
 #define NUMB_VAR 8
 
