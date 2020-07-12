@@ -69,6 +69,7 @@ subroutine read_pars(filename)
   call read_initFileInt (filename,'sim_gpRadii',  sim_gpRadii)
   call read_initFileReal(filename,'sim_gpEll',     sim_gpEll)
   call read_initFileReal(filename,'sim_gpEldel',  sim_gpEldel)
+  call read_initFileReal(filename,'sim_gpSigma',    sim_gpSigma)
   call read_initFileReal(filename,'sim_gpSigdel',  sim_gpSigdel)
 
 end subroutine read_pars

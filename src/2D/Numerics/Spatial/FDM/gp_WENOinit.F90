@@ -10,6 +10,7 @@ subroutine gp_WENOinit()
                        sim_gpEll,    &
                        sim_gpEldel,  &
                        sim_gpKernel, &
+                       sim_gpSigma,  &
                        sim_gpSigdel
 
   implicit none
@@ -56,6 +57,17 @@ subroutine gp_WENOinit()
     sim_gpEll = sim_gpEldel*gr_dx
   end if
   eldel = sim_gpEldel
+
+  ! take care of \sigma
+  if (sim_gpSigma == 0. .and. sim_gpSigdel == 0.) then
+    call abort_slug("both \sigma and \sigma/\Delta are zero. exiting")
+  elseif (sim_gpSigdel == 0.) then
+    sim_gpSigdel = sim_gpSigma/gr_dx
+  elseif (sim_gpSigma == 0.) then
+    sim_gpSigma = sim_gpSigdel*gr_dx
+  end if
+  eldel = sim_gpEldel
+  sigdel = sim_gpSigdel
 
   ! select kernel
   if (sim_gpKernel == 'SE') then
@@ -144,25 +156,21 @@ subroutine gp_WENOinit()
   LDA = N
   LWORK = 66*N
   ! quad <- double precision
-  sigdel = sim_gpSigdel
+  ! sigdel = sim_gpSigdel
+  ! sigdel = eldel
   do i = 1, N
      do j = 1, N
-        Ck(i,j) = gp_kernel(REAL(i, qp), REAL(j, qp), sigdel)    ! calc. K. See eqn 42 and 43
+        ! quad  <-  double precision
+        Cm(i,j) = gp_kernel(REAL(i, qp), REAL(j, qp), sigdel)    ! calc. K. See eqn 42 and 43
      end do
   end do
-  ! truncate to double precision
-  Cm = Ck
-  call DSYEV('V', 'L', N, Cm, LDA, eigvals, WORK, LWORK, INFO)  ! compute eigvals/eigvecs of C |-> C, W
+  call DSYEV('V', 'L', N, Cm, LDA, eigvals, WORK, LWORK, INFO)   ! compute eigvals/eigvecs of C |-> C, W
   if (INFO < 0) then
      call abort_slug("error in dsyev, info != 1")
   end if
 
-  !allocate eigensystem vars for GP
   do i = 1, N
-    do j = 1, N
-      ! TODO: why does it calculate only k = 1 case?
-      Pvecs(j,i) = dot_product(Cm(:,i), Zm(j,:,1))/sqrt(eigvals(i))   ! ean 43; remember C is a eigvecs
-    end do
+     Pvecs(:,i) = Cm(:,i)/sqrt(eigvals(i))         ! ean 43; remember Cm is a eigvecs
   end do
 
 
