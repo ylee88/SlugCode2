@@ -29,7 +29,7 @@ module sim_data
   logical, save :: sim_gpWENO
   character(len=MAX_STRING_LENGTH), save :: sim_gpKernel
   integer, save :: sim_gpRadii
-  real,    save :: sim_gpEll, sim_gpEldel, sim_gpSigdel
+  real,    save :: sim_gpEll, sim_gpEldel, sim_gpSigma, sim_gpSigdel
 
   !! this is only for DMR BC
   real :: sim_t
