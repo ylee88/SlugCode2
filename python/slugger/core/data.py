@@ -29,24 +29,53 @@ def add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
     return im.axes.figure.colorbar(im, cax=cax, **kwargs)
 
 
+def load_data1d(file_name):
+
+    return data1d(file_name)
+
+
 class data1d:
 
-    class ascii:
+    def __init__(self, file_name):
 
-        def __init__(self, file_name):
-            self.filename = file_name
-            self.raw = np.loadtxt(file_name)
-            self.x = self.raw[:, 0]
-            self.dens = self.raw[:, 1]
-            self.velx = self.raw[:, 2]
-            self.pres = self.raw[:, 3]
-            self.eint = self.raw[:, 4]
+        data = slice_2d_to_1dx(file_name)
 
-        def plot(self, var, ax, *args, **kwargs):
+        self.filename = file_name
 
-            var_data = get_data(self, var)
+        self.ybins = data.ybins
+        self.x = data.x
+        self.y = data.y
+        self.dens = data.dens
+        self.velx = data.velx
+        self.vely = data.vely
+        self.pres = data.pres
 
-            ax.plot(self.x, var_data, label=self.filename, *args, **kwargs)
+    def plot(self, var, ax, *args, **kwargs):
+
+        var_data = get_data(self, var)
+
+        ax.plot(self.x, var_data, label=self.filename, *args, **kwargs)
+
+
+def slice_2d_to_1dx(file_name):
+    # load 2d data and
+    # slice the midpoint of y
+
+    data_2d = load_data2d(file_name)
+    midpoint = int(data_2d.ybins/2)
+
+    # init
+    slice_x = data_2d
+
+    slice_x.ybins = 1
+    slice_x.x = data_2d.x
+    slice_x.y = np.array(data_2d.y[midpoint])
+    slice_x.dens = data_2d.dens[midpoint, :]
+    slice_x.velx = data_2d.velx[midpoint, :]
+    slice_x.vely = data_2d.vely[midpoint, :]
+    slice_x.pres = data_2d.pres[midpoint, :]
+
+    return slice_x
 
 
 def load_data2d(file_name):

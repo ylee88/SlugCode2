@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # taking command line args
     switch = sys.argv[1]
     data_files = sys.argv[2:]
-    varlist = ['dens', 'pres', 'velx', 'eint']
+    varlist = ['dens', 'pres', 'velx']
 
     if switch == 'all':
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
         # actual plots
         for filename in data_files:
-            data = slug.data1d.ascii(filename)
+            data = slug.load_data1d(filename)
 
             for var, ax in zip(varlist, axes.ravel()):
                 data.plot(var, ax)
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         # actual plots
         for filename in data_files:
-            data = slug.data1d.ascii(filename)
+            data = slug.load_data1d(filename)
             data.plot(switch, ax1)
 
         ax1.legend()
