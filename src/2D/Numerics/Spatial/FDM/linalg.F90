@@ -69,14 +69,14 @@ contains
     integer   :: i, j
     real(qp)  :: v2, gam
 
-    R = 0.
-    QTb = 0.
-    V = 0.
+    R = 0._qp
+    QTb = 0._qp
+    V = 0._qp
     !we're going to compute the relevant items from the QR factorization
     !R is going to be stored in A
     !we are also going to calculate Q^T*b for the least squares solve
     do i = 1, N
-      v = 0.
+      v = 0._qp
       v(i:M,1) = A(i:M,i)
       !vi = xi + sign(xi)*x^2
       v(i,1  ) = A(i,i) + SIGN( SQRT(dot_product( A(i:M,i),A(i:M,i) )), A(i,i) )
@@ -85,10 +85,10 @@ contains
       v(:,1) = v(:,1)/v2
 
 
-      A(i:M,i:N) = A(i:M,i:N) - 2.*MATMUL( v(i:M,:), MATMUL( TRANSPOSE(v(i:M,:)), A(i:M,i:N) ) )
+      A(i:M,i:N) = A(i:M,i:N) - 2._qp*MATMUL( v(i:M,:), MATMUL( TRANSPOSE(v(i:M,:)), A(i:M,i:N) ) )
 
 
-      gam = -2.*dot_product(v(i:M,1), b(i:M))
+      gam = -2._qp*dot_product(v(i:M,1), b(i:M))
       b(i:M) = b(i:M) + gam*v(i:M,1)
 
     end do
