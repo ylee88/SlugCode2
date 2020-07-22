@@ -19,7 +19,7 @@ subroutine gp_WENOinit()
   real(qp), dimension(2, 2*sim_gpRadii+1) :: T, Z
   real(qp), dimension(2*sim_gpRadii+1) :: stencil
 
-  real(qp), dimension(sim_gpRadii+1, sim_gpRadii+1) :: Ck, Lk, Pvecs
+  real(qp), dimension(sim_gpRadii+1, sim_gpRadii+1) :: Ck, Lk
   real(qp), dimension(2, sim_gpRadii+1, sim_gpRadii+1) :: Zk
   real(qp), dimension(2, sim_gpRadii+1) :: Tk, linW
 
@@ -29,6 +29,7 @@ subroutine gp_WENOinit()
   real, dimension(sim_gpRadii+1, sim_gpRadii+1) :: Cm
   real, dimension(sim_gpRadii+1) :: eigvals
   real, dimension(66*sim_gpRadii+66) :: WORK
+  real, dimension(sim_gpRadii+1, sim_gpRadii+1) :: Pvecs
 
   real(qp), dimension(2*sim_gpRadii+2, sim_gpRadii+1) :: Zmat
   real(qp), dimension(2*sim_gpRadii+2) :: Zvec
@@ -66,7 +67,6 @@ subroutine gp_WENOinit()
   elseif (sim_gpSigma == 0.) then
     sim_gpSigma = sim_gpSigdel*gr_dx
   end if
-  eldel = sim_gpEldel
   sigdel = sim_gpSigdel
 
   ! select kernel
@@ -125,6 +125,7 @@ subroutine gp_WENOinit()
         Pk(j) = gp_predVec(stencil(j), stencil(i), eldel)
       end do
       call solve_Axb(Ck, Zm(:,i,m), Pk(:), Lk, N)    ! under the eqn 39
+      ! Zm(:,:,m) are the same for all m's; checked via numpy
     end do
 
   end do
@@ -170,7 +171,9 @@ subroutine gp_WENOinit()
   end if
 
   do i = 1, N
-     Pvecs(:,i) = Cm(:,i)/sqrt(eigvals(i))         ! ean 43; remember Cm is a eigvecs
+     do j = 1, N
+        Pvecs(j,i) = dot_product(Cm(:,i), Zm(j,:,1))/sqrt(eigvals(i))
+     end do
   end do
 
 
