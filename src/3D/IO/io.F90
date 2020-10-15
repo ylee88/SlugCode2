@@ -284,7 +284,8 @@ contains
     integer(HID_T) :: strlen, strtype
     integer :: file_length
 
-    integer:: ierr, tag, stat
+    integer:: ierr, tag
+    integer, dimension(MPI_STATUS_SIZE) :: stat
 
     tag = 1
     if (bl_ID == 0) then
@@ -475,7 +476,8 @@ contains
     real, dimension(gr_glb_nz) :: zCoord
     real, dimension(NUMB_VAR, gr_glb_nx, gr_glb_ny, gr_glb_nz) :: V
 
-    integer:: ierr, tag, stat
+    integer:: ierr, tag
+    integer, dimension(MPI_STATUS_SIZE) :: stat
 
     tag = 1
     if (bl_ID == 0) then
