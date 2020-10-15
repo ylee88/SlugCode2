@@ -26,6 +26,7 @@ opt: $(EXE_FILE)
 
 OBJS  = slug_driver.o         \
         abort_slug.o          \
+        read_version.o        \
         cfl.o                 \
         io.o                  \
         read_pars.o           \
@@ -74,6 +75,7 @@ OBJS  = slug_driver.o         \
 $(EXE_FILE) : $(OBJS)
 	@$(MC) $(FFLAGS_DOUB) $(OBJS) $(LDFLAGS) -L$(HDF5_LIB) -o $(EXE_FILE)
 	@echo "code is now linking..."
+	@git rev-parse HEAD >| GIT_VERSION
 
 %.o: %.F90
 	$(MC) $(FFLAGS_DOUB) -c $<
@@ -101,4 +103,4 @@ endif
 .PHONY: clean opt
 
 clean:
-	rm -f *.o *.mod *~ $(EXE_FILE) Makefile.dep
+	rm -f *.o *.mod *~ $(EXE_FILE) Makefile.dep GIT_VERSION

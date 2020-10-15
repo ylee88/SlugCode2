@@ -14,7 +14,7 @@ program SlugCode
   real :: t, dt, dt_small, dt_init
   integer :: nStep, ioCounter, ioTimeFreqCounter
   real :: ioCheckTime, start, finish
-  character(len=MAX_STRING_LENGTH) :: init_file_name
+  character(len=MAX_STRING_LENGTH) :: init_file_name, commit_hash
 
   t = 0.
   nStep = 0
@@ -30,6 +30,8 @@ program SlugCode
   if (init_file_name == '') then
     init_file_name = './slug.init'
   end if
+
+  call read_version(commit_hash)
 
   ! grid_init should be called first before sim_init
   call read_pars(init_file_name)
@@ -48,6 +50,7 @@ program SlugCode
     write(*,*)'================================================='
     write(*,*)''
     write(*,*)'   Read parameters from ', '[', trim(init_file_name), ']   '
+    write(*,*)'   Version: ', trim(commit_hash)
     write(*,*)''
 
     ! write the initial condition
@@ -60,7 +63,7 @@ program SlugCode
   end if
 
   ! write initial condition
-  call io_writeOutput(init_file_name, t, nStep, ioCounter, 0.)
+  call io_writeOutput(init_file_name, t, nStep, ioCounter, 0., commit_hash)
 
   ! call cpu_time(start)
   start = MPI_Wtime()
@@ -109,7 +112,7 @@ program SlugCode
       ioCounter = ioCounter + 1
       ioTimeFreqCounter = ioTimeFreqCounter + 1
       finish = MPI_Wtime()
-      call io_writeOutput(init_file_name, t, nStep, ioCounter, finish-start)
+      call io_writeOutput(init_file_name, t, nStep, ioCounter, finish-start, commit_hash)
     endif
 
     if (sim_ioNfreq > 0) then
@@ -124,7 +127,7 @@ program SlugCode
         end if
         ioCounter = ioCounter + 1
         finish = MPI_Wtime()
-        call io_writeOutput(init_file_name, t, nStep, ioCounter, finish-start)
+        call io_writeOutput(init_file_name, t, nStep, ioCounter, finish-start, commit_hash)
       endif
     endif
 
@@ -153,7 +156,7 @@ program SlugCode
     write(*,*)''
   end if
   finish = MPI_Wtime()
-  call io_writeOutput(init_file_name, t, nStep,ioCounter+1, finish-start)
+  call io_writeOutput(init_file_name, t, nStep,ioCounter+1, finish-start, commit_hash)
 
   !! finalize and deallocate memories
   call grid_finalize()

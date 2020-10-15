@@ -24,25 +24,25 @@ module io
 
 contains
 
-  subroutine io_writeOutput(init_file_name, t, nstep, ioCounter, eTime)
+  subroutine io_writeOutput(init_file_name, t, nstep, ioCounter, eTime, commit_hash)
 
     implicit none
-    character(len=MAX_STRING_LENGTH) :: init_file_name
+    character(len=MAX_STRING_LENGTH), intent(IN) :: init_file_name, commit_hash
     real, intent(IN) :: t, eTime
     integer, intent(IN) :: nstep, ioCounter
 
     if (sim_hdf5) then
       if (sim_pIO) then
-        call io_writeHDF5_p(init_file_name, t, nstep, ioCounter, eTime)
+        call io_writeHDF5_p(init_file_name, t, nstep, ioCounter, eTime, commit_hash)
       else
-        call io_writeHDF5(init_file_name, t, nstep, ioCounter, eTime)
+        call io_writeHDF5(init_file_name, t, nstep, ioCounter, eTime, commit_hash)
       end if
     else
       call io_writeASCII(t, nstep, ioCounter)
     end if
   end subroutine io_writeOutput
 
-  subroutine io_writeHDF5_p(init_file_name, t, nstep, ioCounter, eTime)
+  subroutine io_writeHDF5_p(init_file_name, t, nstep, ioCounter, eTime, commit_hash)
 
     use HDF5
     use mpi, ONLY: MPI_COMM_WORLD, MPI_INFO_NULL
@@ -53,7 +53,7 @@ contains
     character(len=5)  :: cCounter
     character(len=50) :: dset_prim, dset_x, dset_y
 
-    character(len=MAX_STRING_LENGTH) :: init_file_name
+    character(len=MAX_STRING_LENGTH), intent(IN) :: init_file_name, commit_hash
     real,    intent(IN) :: t, eTime
     integer, intent(IN) :: nstep, ioCounter
 
@@ -213,10 +213,23 @@ contains
       !write data
       call h5Dwrite_f(dset_id, strtype, init_params, dims_txt, error)
 
-      call H5Tclose_f(strtype,error)
+      ! call H5Tclose_f(strtype,error)
       call H5Dclose_f(dset_id,error)
       call H5Sclose_f(dspace_id,error)
       deallocate(init_params)
+
+
+
+      !dataspace for git version
+      dims_txt = (/ 1 /)
+      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
+      call h5Dcreate_f(file_id, 'version', strtype, dspace_id, dset_id, error)
+      !write data
+      call h5Dwrite_f(dset_id, strtype, commit_hash, dims_txt, error)
+
+      call H5Tclose_f(strtype,error)
+      call H5Dclose_f(dset_id,error)
+      call H5Sclose_f(dspace_id,error)
     ! end if
 
     ! done!
@@ -232,7 +245,7 @@ contains
 
 
 
-  subroutine io_writeHDF5(init_file_name, t, nstep, ioCounter, eTime)
+  subroutine io_writeHDF5(init_file_name, t, nstep, ioCounter, eTime, commit_hash)
 
     ! TODO: I should rewrite this using MPI communications
 
@@ -240,7 +253,7 @@ contains
 
     implicit none
 
-    character(len=MAX_STRING_LENGTH) :: init_file_name
+    character(len=MAX_STRING_LENGTH), intent(IN) :: init_file_name, commit_hash
     real, intent(IN) :: t, eTime
     integer, intent(IN) :: nstep, ioCounter
 
@@ -391,10 +404,21 @@ contains
       !write data
       call h5Dwrite_f(dset_id, strtype, init_params, dims_txt, error)
 
-      call H5Tclose_f(strtype,error)
+      ! call H5Tclose_f(strtype,error)
       call H5Dclose_f(dset_id,error)
       call H5Sclose_f(dspace_id,error)
       deallocate(init_params)
+
+      !dataspace for git version
+      dims_txt = (/ 1 /)
+      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
+      call h5Dcreate_f(file_id, 'version', strtype, dspace_id, dset_id, error)
+      !write data
+      call h5Dwrite_f(dset_id, strtype, commit_hash, dims_txt, error)
+
+      call H5Tclose_f(strtype,error)
+      call H5Dclose_f(dset_id,error)
+      call H5Sclose_f(dspace_id,error)
 
 
       !close hdf5 file and interface
