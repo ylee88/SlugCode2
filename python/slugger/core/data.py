@@ -31,30 +31,48 @@ def add_colorbar(im, aspect=20, pad_fraction=0.5, **kwargs):
 
 def load_data1d(file_name):
 
-    return data1d(file_name)
+    if file_name.endswith('.dat'):
+        return data1d.ascii(file_name)
+    elif file_name.endswith('.slug'):
+        return data1d.hdf5(file_name)
+    else:
+        raise Exception("Unrecognized data file extension.")
 
 
 class data1d:
 
-    def __init__(self, file_name):
+    class ascii:
 
-        data = slice_2d_to_1dx(file_name)
+        def __init__(self, file_name):
+            self.filename = file_name
+            self.raw = np.loadtxt(file_name)
+            self.xbins = int(np.shape(np.unique(self.raw[:, 0]))[0])
+            self.x = self.raw[:, 0]
+            self.dens = self.raw[:, 1]
+            self.velx = self.raw[:, 2]
+            self.pres = self.raw[:, 3]
 
-        self.filename = file_name
+        def plot(self, var, ax, *args, **kwargs):
 
-        self.ybins = data.ybins
-        self.x = data.x
-        self.y = data.y
-        self.dens = data.dens
-        self.velx = data.velx
-        self.vely = data.vely
-        self.pres = data.pres
+            var_data = get_data(self, var)
 
-    def plot(self, var, ax, *args, **kwargs):
+            ax.plot(self.x, var_data, label=self.filename, *args, **kwargs)
 
-        var_data = get_data(self, var)
+    class hdf5(ascii):
 
-        ax.plot(self.x, var_data, label=self.filename, *args, **kwargs)
+        def __init__(self, file_name):
+
+            data = slice_2d_to_1dx(file_name)
+
+            self.filename = file_name
+
+            self.ybins = data.ybins
+            self.x = data.x
+            self.y = data.y
+            self.dens = data.dens
+            self.velx = data.velx
+            self.vely = data.vely
+            self.pres = data.pres
 
 
 def slice_2d_to_1dx(file_name):
