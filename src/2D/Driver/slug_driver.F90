@@ -1,6 +1,7 @@
 program SlugCode
 
 #include "definition.h"
+#include "git_version.h"
 
   use sim_data
   use grid_data
@@ -16,6 +17,8 @@ program SlugCode
   real :: ioCheckTime, start, finish
   character(len=MAX_STRING_LENGTH) :: init_file_name, commit_hash
 
+  commit_hash = VERSION
+
   t = 0.
   nStep = 0
   ioCounter = 0
@@ -30,8 +33,6 @@ program SlugCode
   if (init_file_name == '') then
     init_file_name = './slug.init'
   end if
-
-  call read_version(commit_hash)
 
   ! grid_init should be called first before sim_init
   call read_pars(init_file_name)
