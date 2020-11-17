@@ -62,38 +62,17 @@ class data1d:
 
         def __init__(self, file_name):
 
-            data = slice_2d_to_1dx(file_name)
-
+            f = hdf.File(file_name, "r")
             self.filename = file_name
+            self.raw = np.array(f.get('prim_vars'))
+            self.xbins = np.shape(self.raw[:,  0])[0]
+            self.x = f.get('xCoord')
 
-            self.ybins = data.ybins
-            self.x = data.x
-            self.y = data.y
-            self.dens = data.dens
-            self.velx = data.velx
-            self.vely = data.vely
-            self.pres = data.pres
+            self.dens = self.raw[:, 0]
+            self.velx = self.raw[:, 1]
+            self.pres = self.raw[:, 2]
 
-
-def slice_2d_to_1dx(file_name):
-    # load 2d data and
-    # slice the midpoint of y
-
-    data_2d = load_data2d(file_name)
-    midpoint = int(data_2d.ybins/2)
-
-    # init
-    slice_x = data_2d
-
-    slice_x.ybins = 1
-    slice_x.x = data_2d.x
-    slice_x.y = np.array(data_2d.y[midpoint])
-    slice_x.dens = data_2d.dens[midpoint, :]
-    slice_x.velx = data_2d.velx[midpoint, :]
-    slice_x.vely = data_2d.vely[midpoint, :]
-    slice_x.pres = data_2d.pres[midpoint, :]
-
-    return slice_x
+            self.eTime = np.array(f.get('eTime'))[0]
 
 
 def load_data2d(file_name):

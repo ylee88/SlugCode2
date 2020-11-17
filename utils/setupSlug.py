@@ -74,6 +74,37 @@ def copy_inits(dim):
         shutil.copy(init_orig, init_base)
 
 
+def FDM1D(args=None):
+
+    src_path = '../src'
+    dimension = '1D'
+
+    # init config
+    config = slug_config(src_path, dimension)
+
+    # build the slugcode!
+    config.push_item('System', 'Hydro')
+    config.push_item('Mesh', 'UniformGrid')
+    # I guess temporal doesn't need to have a switch
+    config.push_item('Numerics/Temporal', None)
+    config.push_item('Numerics/Spatial', 'FDM')
+
+    # copy example slug.init file
+    if not os.path.exists('./slug.init'):
+        shutil.copy(os.path.join(config.root, 'slug.init'), './')
+
+    # link makefile
+    if not os.path.exists('./Makefile'):
+        os.symlink(os.path.join(config.root, 'Makefile'), './Makefile')
+        os.symlink(os.path.join(src_path, 'Makefile.header'), './Makefile.header')
+
+    # copy init files
+    copy_inits(dimension)
+
+    # symlinks!
+    config.make_symlinks()
+
+
 def FDM2D(args=None):
 
     src_path = '../src'
@@ -157,6 +188,9 @@ def create_argument_parser():
     # Add command line arguments
     parser = argparse.ArgumentParser(
             description='You never fail until you stop trying.')
+    # FDM1D
+    parser.add_argument('--fdm1d', action='store_true',
+                        help='FDM/1D sovling 1D stencils')
     # FDM2D
     parser.add_argument('--fdm2d', action='store_true',
                         help='FDM/2D sovling 1D stencils')
@@ -172,7 +206,9 @@ if __name__ == '__main__':
     parser = create_argument_parser()
     args = parser.parse_args()
 
-    if args.fdm2d:
+    if args.fdm1d:
+        FDM1D()
+    elif args.fdm2d:
         FDM2D()
     elif args.fdm3d:
         FDM3D()
