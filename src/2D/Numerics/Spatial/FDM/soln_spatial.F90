@@ -102,7 +102,7 @@ subroutine soln_spatial(dt, prim, cons, flux)
 
         ! back projection. result is Fimh
         do var = 1, NSYS_VAR
-          gr_flux(var, i, j, dir) = dot_product( tempL(:) + tempR(:), reig(var,:))
+          gr_flux(var, i, j, dir) = dot_product_syms( tempL(:) + tempR(:), reig(var,:))
         end do
 
       end do !i
