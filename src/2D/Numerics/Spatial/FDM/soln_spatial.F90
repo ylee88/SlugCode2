@@ -24,6 +24,8 @@ subroutine soln_spatial(dt, prim, cons, flux)
   real, dimension(NUMB_VAR) :: Vimh
   real, dimension(NSYS_VAR) :: tempL, tempR
 
+  real :: dot_product_syms
+
   integer :: i, j, dir, var
   integer :: ip, im, jp, jm
   integer :: s, si, sj
@@ -85,8 +87,8 @@ subroutine soln_spatial(dt, prim, cons, flux)
         call right_eigenvectors(Vimh(:), conservative, reig, dir)
         do s = 1, 2*num_radius+1
           do var = 1, NSYS_VAR
-            Wstncl_L(s, var) = 0.5*dot_product( leig(:,var), Fstncl(:,  s) + gr_maxSpeed(var,dir)*Ustncl(:,  s) )
-            Wstncl_R(s, var) = 0.5*dot_product( leig(:,var), Fstncl(:,s+1) - gr_maxSpeed(var,dir)*Ustncl(:,s+1) )
+            Wstncl_L(s, var) = 0.5*dot_product_syms( leig(:,var), Fstncl(:,  s) + gr_maxSpeed(var,dir)*Ustncl(:,  s) )
+            Wstncl_R(s, var) = 0.5*dot_product_syms( leig(:,var), Fstncl(:,s+1) - gr_maxSpeed(var,dir)*Ustncl(:,s+1) )
           end do
         end do
 
@@ -110,3 +112,25 @@ subroutine soln_spatial(dt, prim, cons, flux)
 
   return
 end subroutine soln_spatial
+
+function dot_product_syms(V, W) result(f)
+
+  implicit none
+
+  real, dimension(NSYS_VAR), intent(IN) :: V, W
+  real :: f, sums
+
+  integer :: n
+
+  sums = 0.
+
+  do n = VELX_VAR, VELX_VAR + (NDIM-1)
+    sums = sums + V(n)*W(n)
+  end do
+
+  sums = sums + V(DENS_VAR)*W(DENS_VAR)
+  sums = sums + V(ENER_VAR)*W(ENER_VAR)
+
+  f = sums
+
+end function dot_product_syms
