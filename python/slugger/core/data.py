@@ -39,6 +39,26 @@ def load_data1d(file_name):
         raise Exception("Unrecognized data file extension.")
 
 
+def load_data2d(file_name):
+
+    if file_name.endswith('.dat'):
+        return data2d.ascii(file_name)
+    elif file_name.endswith('.slug'):
+        return data2d.hdf5(file_name)
+    else:
+        raise Exception("Unrecognized data file extension.")
+
+
+def load_data3d(file_name):
+
+    if file_name.endswith('.dat'):
+        return data3d.ascii(file_name)
+    elif file_name.endswith('.slug'):
+        return data3d.hdf5(file_name)
+    else:
+        raise Exception("Unrecognized data file extension.")
+
+
 class data1d:
 
     class ascii:
@@ -66,33 +86,13 @@ class data1d:
             self.filename = file_name
             self.raw = np.array(f.get('prim_vars'))
             self.xbins = np.shape(self.raw[:,  0])[0]
-            self.x = f.get('xCoord')
+            self.x = np.array(f.get('xCoord'))
 
             self.dens = self.raw[:, 0]
             self.velx = self.raw[:, 1]
             self.pres = self.raw[:, 2]
 
             self.eTime = np.array(f.get('eTime'))[0]
-
-
-def load_data2d(file_name):
-
-    if file_name.endswith('.dat'):
-        return data2d.ascii(file_name)
-    elif file_name.endswith('.slug'):
-        return data2d.hdf5(file_name)
-    else:
-        raise Exception("Unrecognized data file extension.")
-
-
-def load_data3d(file_name):
-
-    if file_name.endswith('.dat'):
-        return data3d.ascii(file_name)
-    elif file_name.endswith('.slug'):
-        return data3d.hdf5(file_name)
-    else:
-        raise Exception("Unrecognized data file extension.")
 
 
 class data2d:
