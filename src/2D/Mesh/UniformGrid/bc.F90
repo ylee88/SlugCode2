@@ -181,6 +181,20 @@ module bc
             rcv_buffB(PRES_VAR,i,:) = 116.5
           end if
         end do ! end DMR
+      else if (sim_bcTypeY == "astrojet") then
+        ! rcv_buffB(:,:,:) = loc_buffB(:,:,:)   ! copy EOS data
+        do j = 1, gr_ngc
+          do i = 1, gr_nx
+            xx = gr_xCoord(i+gr_ngc)
+            if (xx < 0.05 .and. xx > -0.05) then
+              ! do nothing
+              rcv_buffB(:,i,j) = V(:,i+gr_ngc,j)
+            else
+              ! do outflow
+              rcv_buffB(:,i,j) = loc_buffB(:,i,1)
+            end if
+          end do
+        end do  ! end astrojet
       end if
     end if
 
@@ -215,6 +229,11 @@ module bc
             end if
           end do
         end do ! end DMR
+      else if (sim_bcTypey == "astrojet") then
+        ! do outflow
+        do j = 1, gr_ngc
+          rcv_buffT(:,:,j) = loc_buffT(:,:,gr_ngc)
+        end do
       end if
     end if
 
@@ -407,6 +426,12 @@ module bc
             rcv_buffBR(PRES_VAR,i-gr_ngc,:) = 116.5
           end if
         end do  ! DMR
+      else if (sim_bcTypeY == "astrojet") then
+        ! do outflow
+        do j = 1, gr_ngc
+          rcv_buffBL(:,:,j) = loc_buffBL(:,:,1)
+          rcv_buffBR(:,:,j) = loc_buffBR(:,:,1)
+        end do
       end if  ! sim_bcTypeY
     end if    ! bl_j
 
@@ -464,6 +489,12 @@ module bc
             end if
           end do
         end do ! end DMR
+      else if (sim_bcTypeY == "astrojet") then
+        ! do outflow
+        do j = 1, gr_ngc
+          rcv_buffTL(:,:,j) = loc_buffTL(:,:,gr_ngc)
+          rcv_buffTR(:,:,j) = loc_buffTR(:,:,gr_ngc)
+        end do
       end if  ! sim_bcTypeY
     end if    ! bl_j
 
