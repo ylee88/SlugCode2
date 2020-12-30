@@ -12,5 +12,7 @@ subroutine soln_numeric(dt)
 
   call num_temporal_method(dt)
 
+  call apply_MPPLimiter(dt)
+
 
 end subroutine soln_numeric

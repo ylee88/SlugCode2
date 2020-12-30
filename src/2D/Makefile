@@ -56,6 +56,7 @@ OBJS  = slug_driver.o         \
         sfPIF.o               \
         WENO.o                \
         soln_WENO5.o          \
+        soln_nestedWENO5.o    \
         gp_data.o             \
         gp_WENOinit.o         \
         gp_interface.o        \
@@ -65,6 +66,7 @@ OBJS  = slug_driver.o         \
         soln_gpWENO7.o        \
         soln_numeric.o        \
         soln_spatial.o        \
+        apply_MPPLimiter.o    \
         soln_update.o
 
 

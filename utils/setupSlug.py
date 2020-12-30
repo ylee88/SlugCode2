@@ -119,6 +119,7 @@ def FDM2D(args=None):
     # I guess temporal doesn't need to have a switch
     config.push_item('Numerics/Temporal', None)
     config.push_item('Numerics/Spatial', 'FDM')
+    config.push_item('Numerics/Positivity', 'MPP')
 
     # copy example (vortex) slug.init file
     if not os.path.exists('./slug.init'):
