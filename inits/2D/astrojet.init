@@ -51,7 +51,7 @@ gr_yend 1.5
 
 # problem specific physical IC
 sim_icType 'astrojet'
-sim_gamma 1.4
+sim_gamma 1.666666667
 sim_smallPres 1.e-12
 
 # BC type
