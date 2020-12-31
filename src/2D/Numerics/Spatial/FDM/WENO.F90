@@ -4,6 +4,38 @@ module WENO
 
 contains
 
+  subroutine Leg_betas(coeff, D, beta)
+    ! DESCRIPTION:
+    !   Calculate smoothness indicators of Legendre polynomial based
+    !   ENO polynomials. Assumed that the input coefficient is the form of
+    !   (/ u0, ux, ux2, ux3, ux4, ... /)
+    !   See https://doi.org/10.1016/j.jcp.2016.09.009
+    ! INPUT:
+    !   coeff : Coefficients of the Legendre based polynomial
+    !   D     : Degree of polynomial
+    ! OUTPUT:
+    !   beta  : Smoothness indicator
+    implicit none
+
+    integer,               intent(IN   ) :: D
+    real   , dimension(D), intent(IN   ) :: coeff
+    real   ,               intent(INOUT) :: beta
+
+    select case(D)
+    case(3)
+      ! coeff = (/ u0, ux, ux2 /)
+      beta = coeff(2)**2 + 13./3.*coeff(3)**2
+    case(5)
+      ! coeff = (/ u0, ux, ux2, ux3, ux4 /)
+      beta =  (coeff(2) + coeff(4)/10.)**2                &
+             + 13./3.*(coeff(3) + 123./455.*coeff(5))**2  &
+             + 781./20.*coeff(4)**2                       &
+             + 1421461./2275.*coeff(5)**2
+    case default
+      call abort_slug('[Leg_betas] Unsupported degree')
+    end select
+  end subroutine Leg_betas
+
   subroutine gp_betas(V, R, beta)
 
     use gp_data , only:  gp_Pvecs

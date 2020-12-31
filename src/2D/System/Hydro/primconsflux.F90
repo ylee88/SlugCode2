@@ -19,7 +19,8 @@ contains
     U(MOMX_VAR) = V(DENS_VAR)*V(VELX_VAR)
     U(MOMY_VAR) = V(DENS_VAR)*V(VELY_VAR)
     ekin = 0.5*V(DENS_VAR)*(V(VELX_VAR)**2+V(VELY_VAR)**2)
-    eint = V(PRES_VAR)/(V(GAME_VAR)-1.)
+    ! eint = V(PRES_VAR)/(V(GAME_VAR)-1.)
+    eint = V(EINT_VAR)
     U(ENER_VAR) = ekin + eint
 
   end subroutine prim2cons
@@ -36,12 +37,12 @@ contains
     V(VELY_VAR) = U(MOMY_VAR)/U(DENS_VAR)
     ekin = 0.5*V(DENS_VAR)*(V(VELX_VAR)**2 + V(VELY_VAR)**2)
     eint = max(U(ENER_VAR) - ekin, sim_smallPres) !eint=rho*e
-    eint = eint/U(DENS_VAR)
     ! get pressure by calling eos
-    ! call eos_cell(U(DENS_VAR),eint,sim_gamma,pres)
-    pres = max((sim_gamma-1.)*U(DENS_VAR)*eint, 1.E-12)
+    ! if (eint < 1.E-11) print*, 'small eint detected', eint
+    pres = max((sim_gamma-1.)*eint, 1.E-12)
+    ! if (pres < 1.1E-12) print *, eint
     V(PRES_VAR) = pres
-    V(EINT_VAR) = eint*U(DENS_VAR)
+    V(EINT_VAR) = eint
     V(GAMC_VAR) = sim_gamma
     V(GAME_VAR) = sim_gamma
 

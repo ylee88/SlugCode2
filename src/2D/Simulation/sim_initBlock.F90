@@ -187,11 +187,27 @@ subroutine sim_initBlock()
           gr_V(PRES_VAR,i,j) = .1
         end if
 
+      elseif (sim_icType == 'astrojet') then
+        x = xx
+        y = yy
+
+        ! mach 80
+        Q1 = (/ 5., 0., 30., 0.4127 /)     ! jet
+        Q2 = (/ 5., 0.,  0., 0.4127 /)     ! ambient
+
+        if (y < 0.0) then
+          if (x < 0.05 .and. x > -0.05) then
+            gr_V(DENS_VAR:PRES_VAR,i,j) = Q1
+          end if
+        else
+          gr_V(DENS_VAR:PRES_VAR,i,j) = Q2
+        end if
+
       end if    ! icType
 
       gr_V(GAMC_VAR,i,j) = sim_gamma
       gr_V(GAME_VAR,i,j) = sim_gamma
-      gr_V(EINT_VAR,i,j) = gr_V(PRES_VAR,i,j)/(gr_V(GAME_VAR,i,j)-1.)/gr_V(DENS_VAR,i,j)
+      gr_V(EINT_VAR,i,j) = gr_V(PRES_VAR,i,j)/(gr_V(GAME_VAR,i,j)-1.)     ! rho*e
 
       call prim2cons(gr_V(:,i,j), gr_U(:,i,j))
 
