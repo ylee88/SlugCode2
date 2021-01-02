@@ -19,12 +19,11 @@ sim_limiter 'mc'
 sim_charLimiting .true.
 
 # high order methods
-sim_order 5
-sim_Torder 3
-sim_RK .true.
+sim_spatialMethod 'WENO5'
+sim_temporalMethod 'RK3'
+sim_positivityLimiter .false.
 
 # if you need cornerBC, turn this on
-# TODO: need to be renamed
 sim_cornerBC .true.
 
 # weno things
