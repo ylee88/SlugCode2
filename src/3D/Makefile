@@ -66,6 +66,7 @@ OBJS  = slug_driver.o         \
         soln_gpWENO7.o        \
         soln_numeric.o        \
         soln_spatial.o        \
+        apply_MPPLimiter.o    \
         soln_update.o
 
 
