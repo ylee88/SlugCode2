@@ -9,7 +9,7 @@ module sim_data
   integer, save :: sim_order, sim_nStep, sim_Torder, sim_mval
   character(len=MAX_STRING_LENGTH), save :: sim_name, sim_riemann, sim_WENO
   character(len=30), save :: sim_spatialMethod, sim_temporalMethod
-  logical, save :: sim_charLimiting, sim_RK, sim_fixDt, sim_nlim
+  logical, save :: sim_charLimiting, sim_RK, sim_fixDt, sim_nlim, sim_positivityLimiter
 
   !! ICs
   real, save :: sim_gamma
