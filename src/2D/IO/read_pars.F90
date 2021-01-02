@@ -12,8 +12,9 @@ subroutine read_pars(filename)
   character(len=*), intent(IN) :: filename
 
   !read sim_data
-  call read_initFileInt (filename,'sim_order',    sim_order)
-  call read_initFileInt (filename,'sim_Torder',   sim_Torder)
+  call read_initFileChar (filename,'sim_spatialMethod', sim_spatialMethod)
+  call read_initFileChar (filename,'sim_temporalMethod', sim_temporalMethod)
+
   call read_initFileInt (filename,'sim_nstep',    sim_nStep)
 
   call read_initFileReal(filename,'sim_dt',       sim_dt)
@@ -27,7 +28,6 @@ subroutine read_pars(filename)
   call read_initFileChar(filename,'sim_WENO',    sim_WENO)
 
   call read_initFileBool(filename,'sim_charLimiting', sim_charLimiting)
-  call read_initFileBool(filename,'sim_RK',    sim_RK)
   call read_initFileBool(filename,'sim_fixDt', sim_fixDt)
   call read_initFileBool(filename,'sim_nlim',  sim_nlim)
   call read_initFileBool(filename,'sim_hdf5',  sim_hdf5)

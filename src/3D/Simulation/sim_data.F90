@@ -8,6 +8,7 @@ module sim_data
   real, save :: sim_cfl, sim_tmax, sim_outputIntervalTime, sim_dt, sim_WENeps
   integer, save :: sim_order, sim_nStep, sim_Torder, sim_mval
   character(len=MAX_STRING_LENGTH), save :: sim_name, sim_riemann, sim_WENO
+  character(len=30), save :: sim_spatialMethod, sim_temporalMethod
   logical, save :: sim_charLimiting, sim_RK, sim_fixDt, sim_nlim
 
   !! ICs

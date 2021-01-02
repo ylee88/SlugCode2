@@ -1,10 +1,12 @@
 subroutine num_init()
 
-  use sim_data, only: sim_Torder,   &
-                      sim_order,    &
-                      sim_RK,       &
-                      sim_cornerBC, &
-                      sim_gpWENO,   &
+  use sim_data, only: sim_spatialMethod,  &
+                      sim_temporalMethod, &
+                      sim_Torder,         &
+                      sim_order,          &
+                      sim_RK,             &
+                      sim_cornerBC,       &
+                      sim_gpWENO,         &
                       sim_gpRadii
   use grid_data, only: gr_ngc
   use num_data
@@ -13,54 +15,71 @@ subroutine num_init()
 
   procedure(temporal) :: soln_RK2, soln_RK3, soln_RK4
   procedure(temporal) :: soln_sfPIF3, soln_sfPIF4
-  procedure(spatial) :: soln_WENO5
+  procedure(spatial) :: soln_WENO5, soln_nestedWENO5
   procedure(spatial) :: soln_gpWENO5, soln_gpWENO7
 
-  if (sim_RK) then
-    ! RK doesn't need corner exchanges
+
+  ! choose temporal method
+  select case(sim_temporalMethod)
+  ! RK
+  case('RK2')
+    num_temporal_method => soln_RK2
+    sim_Torder = 2
     sim_cornerBC = .false.
-
-    if (sim_Torder == 2) then
-      num_temporal_method => soln_RK2
-    else if (sim_Torder == 3) then
-      num_temporal_method => soln_RK3
-    else if (sim_Torder == 4) then
-      num_temporal_method => soln_RK4
-    else
-      call abort_slug("unrecognized sim_Torder")
-    end if
-
-  else
-    ! sfPIF needs corner exchanges
+    sim_RK = .true.
+  case('RK3')
+    num_temporal_method => soln_RK3
+    sim_Torder = 3
+    sim_cornerBC = .false.
+    sim_RK = .true.
+  case('RK4')
+    num_temporal_method => soln_RK4
+    sim_Torder = 4
+    sim_cornerBC = .false.
+    sim_RK = .true.
+  ! SF-PIF
+  case('SF3')
+    num_temporal_method => soln_sfPIF3
+    sim_Torder = 3
     if (.not. sim_cornerBC) call abort_slug("sfPIF needs sim_cornerBC")
+    sim_RK = .false.
+  case('SF4')
+    num_temporal_method => soln_sfPIF4
+    sim_Torder = 4
+    if (.not. sim_cornerBC) call abort_slug("sfPIF needs sim_cornerBC")
+    sim_RK = .false.
+  case DEFAULT
+    call abort_slug("unrecognized sim_temporalMethod: "//sim_temporalMethod)
+  end select
 
-    if (sim_Torder == 3) then
-      num_temporal_method => soln_sfPIF3
-    else if (sim_Torder == 4) then
-      num_temporal_method => soln_sfPIF4
-    else
-      call abort_slug("unrecognized sim_RK & sim_Torder")
-    end if
-  end if
 
-  if (sim_gpWENO) then
+
+  ! choose spatial method
+  select case(sim_spatialMethod)
+  case('WENO5')
+    num_spatial_method => soln_WENO5
+    sim_order = 5
+    num_radius = 2
+  case('nestedWENO5')
+    num_spatial_method => soln_nestedWENO5
+    sim_order = 5
+    num_radius = 2
+  case('gpWENO5')
+    num_spatial_method => soln_gpWENO5
     call gp_WENOinit()
+    sim_order = 5
+    sim_gpWENO = .true.
     num_radius = sim_gpRadii
-    if (num_radius == 2) then
-      num_spatial_method => soln_gpWENO5
-    else if (num_radius == 3) then
-      num_spatial_method => soln_gpWENO7
-    else
-      call abort_slug("unrecognized sim_gpRadii")
-    end if
-  else
-    if (sim_order == 5) then
-      num_radius = 2
-      num_spatial_method => soln_WENO5
-    else
-      call abort_slug("unrecognized sim_order")
-    end if
-  end if
+  case('gpWENO7')
+    num_spatial_method => soln_gpWENO7
+    call gp_WENOinit()
+    sim_order = 7
+    sim_gpWENO = .true.
+    num_radius = sim_gpRadii
+  case DEFAULT
+    call abort_slug("unrecognized sim_spatialMethod: "//sim_spatialMethod)
+  end select
+
 
   ! check if there are sufficient guard cells.
   ! sfPIF needs more guard cells b/c num_diffs
