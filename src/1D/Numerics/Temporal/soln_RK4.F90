@@ -1,34 +1,48 @@
 subroutine soln_RK4(dt)
+  ! 5 stages, 4th-order RK method.
+  ! ref: 10.1137/S0036142901389025
 
 #include "definition.h"
 
-  use grid_data, only: gr_V,                &
-                       gr_U,                &
-                       gr_flux,             &
-                       gr_dx,               &
-                       gr_i0, gr_imax,      &
+  use grid_data, only: gr_V,             &
+                       gr_U,             &
+                       gr_flux,          &
+                       gr_dx,            &
+                       gr_i0, gr_imax,   &
                        gr_ibeg, gr_iend
-  use primconsflux, only: prim2cons,        &
-                          prim2flux,        &
+  use primconsflux, only: prim2cons,     &
+                          prim2flux,     &
                           cons2prim
   use bc, only: bc_apply
 
   implicit none
 
   real, intent(IN) :: dt
-  real :: dtx, F, A
-  integer :: m, i, dir
+  real :: dtx
+  integer :: m, n, i, dir
   real, dimension(NSYS_VAR, gr_imax(XDIM)) :: Uk
   real, dimension(NSYS_VAR, gr_imax(XDIM), NDIM) :: mFlux !(var,i,j,k,ndim)
 
   real, dimension(NUMB_VAR, gr_imax(XDIM)) :: prim
   real, dimension(NSYS_VAR, gr_imax(XDIM)) :: cons
   real, dimension(NSYS_VAR, gr_imax(XDIM), NDIM) :: flux
+  real, dimension(NSYS_VAR, gr_imax(XDIM), NDIM, 4) :: nFlux
+
+  real, dimension(5) :: F
+  real, dimension(4,4) :: A
+
+  A(:, :) = 0.
+  A(1  , 1) = 0.39175222657189
+  A(1:2, 2) = (/ 0.217669096261169, 0.368410593050371  /)
+  A(1:3, 3) = (/ 0.0826920866578106, 0.139958502191895, 0.251891774271694 /)
+  A(1:4, 4) = (/ 0.0679662836371148, 0.115034698504632, 0.207034898597386, 0.544974750228521 /)
+
+  F = (/ 0.146811876084786, 0.248482909444976, 0.104258830331981, 0.27443890090135, 0.226007483236906 /)
 
   mFlux = 0.
+  nFlux = 0.
 
-  do m = 1, 4
-
+  do m = 1, 5
     ! initial data for spatial recon/intp
     prim = gr_V
     do i = gr_i0(XDIM), gr_imax(XDIM)
@@ -40,34 +54,27 @@ subroutine soln_RK4(dt)
     ! spatial recon/intp
     call soln_spatial(dt, prim, cons, flux)
 
-    if (m == 1 .OR. m == 2) then
-      A = 0.5
-    else 
-      A = 1.
-    end if
+    dtx = dt/gr_dx
 
-    if (m == 1 .OR. m == 4) then
-      F = 1./6.
-    else
-      F = 1./3.
-    end if
+    if (m /= 5) then
 
-    dtx = A*dt/gr_dx
+      nFlux(:,:,:,m) = gr_flux(:,:,:)      ! save interstage fluxes
 
-    Uk = 0.
-
-    if (m .NE. 4) then
-      !update cons variables to mth step only if not 4th step
-      do i = gr_ibeg(XDIM), gr_iend(XDIM)
-        Uk(DENS_VAR:ENER_VAR,i) = gr_U(DENS_VAR:ENER_VAR,i) - &
-          dtx*(gr_flux(DENS_VAR:ENER_VAR,i+1,XDIM) - gr_flux(DENS_VAR:ENER_VAR,i,XDIM))
+      Uk = gr_U
+      do n = 1, m
+        do i = gr_ibeg(XDIM), gr_iend(XDIM)
+          ! uk = uk-1 - dt*A0*L(u0) - ... - dt*Ak-1*L(uk-1)
+          Uk(DENS_VAR:ENER_VAR,i) = Uk(DENS_VAR:ENER_VAR,i) - &
+            A(n,m)*dtx*(nFlux(DENS_VAR:ENER_VAR,i+1,XDIM,n) - nFlux(DENS_VAR:ENER_VAR,i,XDIM,n))
           call cons2prim(Uk(DENS_VAR:ENER_VAR,i), gr_V(DENS_VAR:GAME_VAR,i))
+        end do
       end do
+
     end if
 
     call bc_apply(gr_V)
 
-    mFlux(:,:,:) = mFlux(:,:,:) + F*gr_flux(:,:,:)
+    mFlux(:,:,:) = mFlux(:,:,:) + F(m)*gr_flux(:,:,:)
 
   end do
 

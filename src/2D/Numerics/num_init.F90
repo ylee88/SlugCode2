@@ -13,7 +13,7 @@ subroutine num_init()
 
   implicit none
 
-  procedure(temporal) :: soln_RK2, soln_RK3, soln_RK4
+  procedure(temporal) :: soln_RK2, soln_RK3, soln_RK4, soln_RK44
   procedure(temporal) :: soln_sfPIF3, soln_sfPIF4
   procedure(spatial) :: soln_WENO5, soln_nestedWENO5
   procedure(spatial) :: soln_gpWENO5, soln_gpWENO7
@@ -34,6 +34,11 @@ subroutine num_init()
     sim_RK = .true.
   case('RK4')
     num_temporal_method => soln_RK4
+    sim_Torder = 4
+    sim_cornerBC = .false.
+    sim_RK = .true.
+  case('RK44')
+    num_temporal_method => soln_RK44      ! traditional, nonSSP-RK4
     sim_Torder = 4
     sim_cornerBC = .false.
     sim_RK = .true.

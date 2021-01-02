@@ -50,6 +50,7 @@ OBJS  = slug_driver.o         \
         soln_RK2.o            \
         soln_RK3.o            \
         soln_RK4.o            \
+        soln_RK44.o           \
         soln_sfPIF3.o         \
         soln_sfPIF4.o         \
         num_diff.o            \
