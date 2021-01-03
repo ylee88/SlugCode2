@@ -1,7 +1,5 @@
 module io
 
-  ! TODO: write t & nStep in the output
-
 #include "definition.h"
 
   use grid_data, only : gr_V,               &
@@ -38,7 +36,7 @@ contains
         call io_writeHDF5(init_file_name, t, nstep, ioCounter, eTime, commit_hash)
       end if
     else
-      call io_writeASCII(t, nstep, ioCounter)
+      call io_writeASCII(ioCounter)
     end if
   end subroutine io_writeOutput
 
@@ -46,6 +44,7 @@ contains
 
     use HDF5
     use mpi, ONLY: MPI_COMM_WORLD, MPI_INFO_NULL
+    use io_hdf5_misc, ONLY: io_writeHDF5_simInfo
 
     implicit none
 
@@ -60,19 +59,14 @@ contains
     real, allocatable, dimension(:,:)   :: img_V
     real, allocatable, dimension(:)     :: xCoord
 
-    integer(HSIZE_T), dimension(1) :: dimT, dims_XYZ
+    integer(HSIZE_T), dimension(1) :: dims_XYZ
     integer(HSIZE_T), dimension(1) :: xyoffset
     integer(HSIZE_T), dimension(2) :: dims_V, glb_dims_V, hs_start, hs_stride, hs_count
     integer(HID_T) :: file_id, dspace_id, dset_id, mspace_id
     integer(HID_T) :: plist_file, plist_dset, plist_dxfer
 
-    character(len=MAX_STRING_LENGTH), dimension(:), allocatable :: init_params
-    integer(HID_T), dimension(1) :: dims_txt
-    integer(HID_T) :: strlen, strtype
-    integer :: file_length
-
     integer :: i, comm, info, error
-    integer :: rank_V, rank_XYZ, rankT
+    integer :: rank_V, rank_XYZ
 
     allocate(img_V(NSYS_VAR, gr_nx))
     img_V(1:NSYS_VAR, :) = gr_V(1:NSYS_VAR, gr_ibeg(XDIM):gr_iend(XDIM))
@@ -168,49 +162,8 @@ contains
 
       deallocate(xCoord)
 
-
-      !dataspace for elapsed cpu time
-      rankT = 1
-      dimT  = 1
-      call H5Screate_simple_f(rankT, dimT, dspace_id, error)
-      call H5Dcreate_f(file_id, 'eTime', H5T_NATIVE_DOUBLE, dspace_id, dset_id, error)
-      !write data
-      call H5Dwrite_f(dset_id, H5T_NATIVE_DOUBLE, eTime, dimT, error)
-
-      call H5Dclose_f(dset_id,error)
-      call H5Sclose_f(dspace_id,error)
-
-
-      !dataspace for init parameters
-      !allocate contents of init_file_name to init_params
-      call text_to_array(init_file_name, file_length, init_params)
-      ! extend string datatype
-      strlen = MAX_STRING_LENGTH
-      call H5Tcopy_f(H5T_FORTRAN_S1, strtype, error)
-      call H5Tset_size_f(strtype, strlen, error)
-      !datatspace
-      dims_txt = (/ file_length /)
-      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
-      call h5Dcreate_f(file_id, 'init_params', strtype, dspace_id, dset_id, error)
-      !write data
-      call h5Dwrite_f(dset_id, strtype, init_params, dims_txt, error)
-
-      ! call H5Tclose_f(strtype,error)
-      call H5Dclose_f(dset_id,error)
-      call H5Sclose_f(dspace_id,error)
-      deallocate(init_params)
-
-
-      !dataspace for git version
-      dims_txt = (/ 1 /)
-      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
-      call h5Dcreate_f(file_id, 'version', strtype, dspace_id, dset_id, error)
-      !write data
-      call h5Dwrite_f(dset_id, strtype, commit_hash, dims_txt, error)
-
-      call H5Tclose_f(strtype,error)
-      call H5Dclose_f(dset_id,error)
-      call H5Sclose_f(dspace_id,error)
+      ! write simulation infos
+      call io_writeHDF5_simInfo(file_id, init_file_name, t, nstep, eTime, commit_hash)
 
     ! end if
 
@@ -232,6 +185,7 @@ contains
     ! TODO: I should rewrite this using MPI communications
 
     use HDF5
+    use io_hdf5_misc, ONLY: io_writeHDF5_simInfo
 
     implicit none
 
@@ -249,14 +203,8 @@ contains
 
     character(len=50) :: dset_prim, dset_x
     integer(HID_T)    :: file_id, dspace_id, dset_id
-    integer           :: error, rank_V, rank_XYZ, rankT
-    integer(HSIZE_T), dimension(1) :: dimT
+    integer           :: error, rank_V, rank_XYZ
     integer(HSIZE_T),allocatable, dimension(:) :: dims_V, dims_XYZ
-
-    character(len=MAX_STRING_LENGTH), dimension(:), allocatable :: init_params
-    integer(HID_T), dimension(1) :: dims_txt
-    integer(HID_T) :: strlen, strtype
-    integer :: file_length
 
     integer:: ierr, tag
     integer, dimension(MPI_STATUS_SIZE) :: stat
@@ -329,50 +277,8 @@ contains
       call h5dclose_f(dset_id,error)
       call h5sclose_f(dspace_id,error)
 
-
-      !dataspace for elapsed cpu time
-      rankT = 1
-      dimT  = 1
-      call h5screate_simple_f(rankT,dimT,dspace_id,error)
-      call h5dcreate_f(file_id, 'eTime', h5T_NATIVE_DOUBLE, dspace_id, dset_id, error)
-      !write data
-      call h5dwrite_f(dset_id, H5T_NATIVE_DOUBLE, eTime, dimT, error)
-
-      call h5dclose_f(dset_id,error)
-      call h5sclose_f(dspace_id,error)
-
-
-      !dataspace for init parameters
-      !allocate contents of init_file_name to init_params
-      call text_to_array(init_file_name, file_length, init_params)
-      ! extend string datatype
-      strlen = MAX_STRING_LENGTH
-      call H5Tcopy_f(H5T_FORTRAN_S1, strtype, error)
-      call H5Tset_size_f(strtype, strlen, error)
-      !datatspace
-      dims_txt = (/ file_length /)
-      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
-      call h5Dcreate_f(file_id, 'init_params', strtype, dspace_id, dset_id, error)
-      !write data
-      call h5Dwrite_f(dset_id, strtype, init_params, dims_txt, error)
-
-      ! call H5Tclose_f(strtype,error)
-      call H5Dclose_f(dset_id,error)
-      call H5Sclose_f(dspace_id,error)
-      deallocate(init_params)
-
-
-      !dataspace for git version
-      dims_txt = (/ 1 /)
-      call h5Screate_simple_f(1, dims_txt, dspace_id, error)
-      call h5Dcreate_f(file_id, 'version', strtype, dspace_id, dset_id, error)
-      !write data
-      call h5Dwrite_f(dset_id, strtype, commit_hash, dims_txt, error)
-
-      call H5Tclose_f(strtype,error)
-      call H5Dclose_f(dset_id,error)
-      call H5Sclose_f(dspace_id,error)
-
+      ! write simulation infos
+      call io_writeHDF5_simInfo(file_id, init_file_name, t, nstep, eTime, commit_hash)
 
       !close hdf5 file and interface
       call h5fclose_f(file_id,error)
@@ -395,11 +301,10 @@ contains
   end subroutine io_writeHDF5
 
 
-  subroutine io_writeASCII(t, nstep, ioCounter)
+  subroutine io_writeASCII(ioCounter)
     implicit none
 
-    real, intent(IN) :: t
-    integer, intent(IN) :: nstep, ioCounter
+    integer, intent(IN) :: ioCounter
 
     integer :: i, nVar, dest
     character(len=200) :: ofile
@@ -463,46 +368,6 @@ contains
 920 format(1x,f16.8,1x,f16.8,1x,f16.8,1x,NUMB_VAR f32.16)
 
   end subroutine io_writeASCII
-
-
-
-
-  ! miscs
-  subroutine text_to_array(ofile, line_num, text_array)
-    ! open text file, store the contents into string array
-
-    implicit none
-
-    character(len=MAX_STRING_LENGTH), intent(IN) :: ofile
-    character(len=MAX_STRING_LENGTH), allocatable, dimension(:), intent(INOUT) :: text_array
-    integer, intent(OUT) :: line_num
-
-    character(len=MAX_STRING_LENGTH) :: ctmp
-    integer :: i, uid, ierr
-
-    uid = 50
-
-    open(unit=uid, file=ofile, status='unknown')
-
-    ! get line number
-    ierr = 0
-    line_num = 0
-    do while(ierr == 0)
-      line_num = line_num + 1
-      read(uid, '(A)', iostat=ierr) ctmp
-    end do
-    line_num = line_num - 1
-
-    allocate(text_array(line_num))
-
-    rewind(uid)
-    do i = 1, line_num
-      read(uid, '(A)') text_array(i)
-    end do
-
-    close(uid)
-
-  end subroutine text_to_array
 
 
 end module io

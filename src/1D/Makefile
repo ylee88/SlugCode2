@@ -28,6 +28,7 @@ OBJS  = slug_driver.o         \
         abort_slug.o          \
         cfl.o                 \
         io.o                  \
+        io_hdf5_misc.o        \
         read_pars.o           \
         read_initFile.o       \
         bc.o                  \
@@ -82,6 +83,9 @@ $(EXE_FILE) : $(OBJS)
 	$(MC) $(FFLAGS_DOUB) -c $<
 
 io.o: io.F90
+	$(MC) $(FFLAGS_DOUB) -I$(HDF5_INC) -c $<
+
+io_hdf5_misc.o: io_hdf5_misc.F90
 	$(MC) $(FFLAGS_DOUB) -I$(HDF5_INC) -c $<
 
 
