@@ -108,7 +108,7 @@ contains
     real, intent(IN) :: dt, b
 
     real :: r
-    real :: eps, tmp
+    real :: eps
 
     eps = sqrt(b)/NORM2(V)
     r = min(dt, eps)

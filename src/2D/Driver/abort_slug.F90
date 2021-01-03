@@ -7,10 +7,10 @@ subroutine abort_slug(msg)
   implicit none
 
   character(len=*), intent(IN) :: msg
-  integer :: ierr
+  integer :: errcode, ierr
 
   write(*,*)'ERROR: ', msg
-  call MPI_Abort(MPI_COMM_WORLD, ierr, ierr)
+  call MPI_Abort(MPI_COMM_WORLD, errcode, ierr)
   stop
 
 end subroutine abort_slug
