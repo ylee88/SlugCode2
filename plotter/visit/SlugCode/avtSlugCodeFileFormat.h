@@ -44,9 +44,11 @@ class avtSlugCodeFileFormat : public avtSTSDFileFormat
     // file.  These should only be defined if the file format knows what the
     // time and/or cycle is.
     //
-    // virtual int       GetCycle(void);
-    // virtual double    GetTime(void);
-    //
+    virtual int       GetCycle(void);
+    virtual double    GetTime(void);
+
+    virtual bool      ReturnsValidCycle() const { return true; }
+    virtual bool      ReturnsValidTime() const { return true; }
 
     virtual const char    *GetType(void)   { return "SlugCode"; };
     virtual void           FreeUpResources(void);
