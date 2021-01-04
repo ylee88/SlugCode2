@@ -123,6 +123,18 @@ subroutine sim_initBlock()
           gr_V(VELY_VAR,i,j,k) = 0.
           gr_V(VELZ_VAR,i,j,k) = 0.
 
+        elseif (sim_icType == 'tgv') then
+          ! see eqn. 4.13 of 10.1016/j.jcp.2020.110006
+          x = xx
+          y = yy
+          z = zz
+
+          gr_V(DENS_VAR,i,j,k) = 1.
+          gr_V(VELX_VAR,i,j,k) = SIN(x)*COS(y)*COS(z)
+          gr_V(VELY_VAR,i,j,k) = -COS(x)*SIN(y)*COS(z)
+          gr_V(VELZ_VAR,i,j,k) = 0.
+          gr_V(PRES_VAR,i,j,k) = 100. + 1./16.*( COS(2.*x) + COS(2.*y) )*( COS(2.*z) + 2. )
+
         end if    ! icType
 
         gr_V(GAMC_VAR,i,j,k) = sim_gamma
