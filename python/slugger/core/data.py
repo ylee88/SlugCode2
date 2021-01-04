@@ -93,6 +93,8 @@ class data1d:
             self.pres = self.raw[:, 2]
 
             self.eTime = np.array(f.get('eTime'))[0]
+            self.time = np.array(f.get('time'))[0]
+            self.nStep = int(np.array(f.get('nStep'))[0])
 
 
 class data2d:
@@ -300,6 +302,8 @@ class data2d:
             self.pres = self.raw[:, :, 3]
 
             self.eTime = np.array(f.get('eTime'))[0]
+            self.time = np.array(f.get('time'))[0]
+            self.nStep = int(np.array(f.get('nStep'))[0])
 
 # below functions should be redefined as the dimension of xCoord and yCoord are
 # different with ascii data's -> TODO: fixit!
@@ -437,3 +441,5 @@ class data3d:
             self.pres = self.raw[:, :, :, 4].T
 
             self.eTime = np.array(f.get('eTime'))[0]
+            self.time = np.array(f.get('time'))[0]
+            self.nStep = int(np.array(f.get('nStep'))[0])
