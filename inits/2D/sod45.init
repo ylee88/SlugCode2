@@ -2,7 +2,7 @@
 # name, and a space, followed by values 
 
 # sim variables
-sim_name 'sodx'
+sim_name 'sod45'
 
 sim_fixDt .false.
 sim_dt 0.001
@@ -10,7 +10,7 @@ sim_dt 0.001
 sim_cfl 0.4
 sim_tmax .2
 
-sim_nstep 10
+sim_nstep 1
 sim_nlim .false.
 
 # unused for FDM
@@ -39,27 +39,27 @@ sim_gpEll 1.
 sim_gpEldel 0.
 
 # grid variables
-gr_ngc 6
+gr_ngc 7
 gr_nx 256
-gr_ny 2
+gr_ny 256
 
 gr_xbeg 0.
-gr_xend 1.
+gr_xend 2.82842712474619
 gr_ybeg 0.
-gr_yend 1.
+gr_yend 2.82842712474619
 
 # problem specific physical IC
-sim_icType 'sodx'
+sim_icType 'sod45'
 sim_gamma 1.4
 sim_smallPres 1.e-12
 
 # BC type
-sim_bcTypeX 'outflow'
-sim_bcTypeY 'outflow'
+sim_bcTypeX 'periodic'
+sim_bcTypeY 'periodic'
 
 # block sizes
-bl_iProcs 4
-bl_jProcs 1
+bl_iProcs 2
+bl_jProcs 2
 
 # IO frequency
 sim_ioTfreq 100000. #real

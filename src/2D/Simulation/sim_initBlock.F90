@@ -173,11 +173,12 @@ subroutine sim_initBlock()
         gr_V(VELX_VAR,i,j) = gr_V(VELX_VAR,i,j) + small*ranx
         gr_V(VELY_VAR,i,j) = small*rany
 
-      elseif (sim_icType == 'sodx') then
+      elseif (sim_icType == 'sod45') then
         x = xx
         y = yy
+        x0 = x*COS(PI/4.) + y*SIN(PI/4.) + 0.25*(gr_dx + gr_dy)
         gr_V(VELY_VAR,i,j) = 0.
-        if(x < .5) then
+        if(x0 <= .5 .or. (x0 > 1.5 .and. x0 <= 2.5) .or. (x0 > 3.5 .and. x0 <= 4.)) then
           gr_V(DENS_VAR,i,j) = 1.
           gr_V(VELX_VAR,i,j) = 0.
           gr_V(PRES_VAR,i,j) = 1.
