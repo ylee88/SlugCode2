@@ -293,8 +293,8 @@ class data2d:
             f = hdf.File(file_name, "r")
             self.raw = np.array(f.get('prim_vars'))
             self.ybins, self.xbins = np.shape(self.raw[:, :, 0])
-            self.x = f.get('xCoord')
-            self.y = f.get('yCoord')
+            self.x = np.array(f.get('xCoord'))
+            self.y = np.array(f.get('yCoord'))
 
             self.dens = self.raw[:, :, 0]
             self.velx = self.raw[:, :, 1]
@@ -430,9 +430,9 @@ class data3d:
             f = hdf.File(file_name, "r")
             self.raw = np.array(f.get('prim_vars'))
             self.zbins, self.ybins, self.xbins = np.shape(self.raw[:, :, :, 0])
-            self.x = f.get('xCoord')
-            self.y = f.get('yCoord')
-            self.z = f.get('zCoord')
+            self.x = np.array(f.get('xCoord'))
+            self.y = np.array(f.get('yCoord'))
+            self.z = np.array(f.get('zCoord'))
 
             self.dens = self.raw[:, :, :, 0].T
             self.velx = self.raw[:, :, :, 1].T
