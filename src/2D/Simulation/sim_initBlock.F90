@@ -20,6 +20,9 @@ subroutine sim_initBlock()
 
   ! for riemann problem
   real, dimension(NSYS_VAR) :: Q1, Q2, Q3, Q4
+  ! for shockvortex problem
+  real :: Ms, Mv, Vm, aa, bb, rr
+  real :: mag, sintheta, costheta, Ta, Tu, Radial
 
   real :: x0, y0
   real :: xx, yy
@@ -202,6 +205,60 @@ subroutine sim_initBlock()
           end if
         else
           gr_V(DENS_VAR:PRES_VAR,i,j) = Q2
+        end if
+
+      elseif (sim_icType == 'shockvortex') then
+        x = xx
+        y = yy
+
+        Ms = 1.5    ! Mach number
+        Mv = 0.9    ! vortex strength
+
+        Q1 = (/ 1.0, Ms*SQRT(sim_gamma), 0.0, 1.0 /)   ! upstream
+        Tu = Q1(PRES_VAR)/Q1(DENS_VAR)
+
+        if (x <= 0.5) then
+          gr_V(DENS_VAR:PRES_VAR,i,j) = Q1
+          T = Tu
+        else
+          gr_V(DENS_VAR,i,j) = Q1(DENS_VAR)*(sim_gamma + 1.)*Ms**2/(2. + (sim_gamma - 1.)*Ms**2)
+          gr_V(VELX_VAR,i,j) = Q1(VELX_VAR)*(2. + (sim_gamma - 1.)*Ms**2)/((sim_gamma + 1.)*Ms**2)
+          gr_V(VELY_VAR,i,j) = Q1(VELY_VAR)
+          gr_V(PRES_VAR,i,j) = Q1(PRES_VAR)*(1. + (2.*sim_gamma/(sim_gamma + 1.))*(Ms**2 - 1.))
+          T = gr_V(PRES_VAR,i,j)/gr_V(DENS_VAR,i,j)
+        end if
+
+        ! vortex size
+        aa = 0.075
+        bb = 0.175
+
+        rr = SQRT( (x-0.25)**2 + (y-0.5)**2 )
+
+        Vm = Mv*sqrt(sim_gamma)
+        if (rr <= bb) then
+          sintheta = (y-0.5)/rr
+          costheta = (x-0.25)/rr
+
+          if (rr <= aa) then
+            mag = Vm*rr/aa
+            gr_V(VELX_VAR,i,j) = gr_V(VELX_VAR,i,j) - mag*sintheta
+            gr_V(VELY_VAR,i,j) = gr_V(VELY_VAR,i,j) + mag*costheta
+
+            Radial = -2.*bb**2*LOG(bb) - 0.5*aa**2 + 2.*bb**2*LOG(aa) + 0.5*bb**4/aa**2
+            Ta = Tu - (sim_gamma - 1.)*(Vm*aa/(aa**2 - bb**2))**2*Radial/sim_gamma
+            T  = Ta - (sim_gamma - 1.)*Vm**2*(1.-rr**2/aa**2)/(2.*sim_gamma)
+          else
+            mag = Vm*aa*(rr - bb**2/rr)/(aa**2 - bb**2)
+            gr_V(VELX_VAR,i,j) = gr_V(VELX_VAR,i,j) - mag*sintheta
+            gr_V(VELY_VAR,i,j) = gr_V(VELY_VAR,i,j) + mag*costheta
+
+            Radial = -2.*bb**2*LOG(bb) - 0.5*rr**2 + 2.*bb**2*LOG(rr) + 0.5*bb**4/rr**2
+            T = Tu - (sim_gamma - 1.)*(Vm*aa/(aa**2 - bb**2))**2*Radial/sim_gamma
+          end if
+
+          gr_V(DENS_VAR,i,j) = gr_V(DENS_VAR,i,j)*(T/Tu)**(1./(sim_gamma - 1.))
+          gr_V(PRES_VAR,i,j) = gr_V(PRES_VAR,i,j)*(T/Tu)**(sim_gamma/(sim_gamma - 1.))
+
         end if
 
       end if    ! icType

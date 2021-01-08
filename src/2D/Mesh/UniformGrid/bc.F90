@@ -132,6 +132,9 @@ module bc
       else if (sim_bcTypeX == "DMR") then
         ! do nothing; just copy ghost cell's inform
         rcv_buffL(:,:,:) = V(:, i0:i0+gc, jbeg:jend)
+      else if (sim_bcTypeX == "SHOCKVORTEX") then
+        ! do nothing; just copy ghost cell's inform
+        rcv_buffL(:,:,:) = V(:, i0:i0+gc, jbeg:jend)
       end if
     end if
 
@@ -146,6 +149,11 @@ module bc
         end do
         rcv_buffR(VELX_VAR,:,:) = -rcv_buffR(VELX_VAR,:,:)
       else if (sim_bcTypeX == "DMR") then
+        ! do outflow
+        do i = 1, gr_ngc
+          rcv_buffR(:,i,:) = loc_buffR(:,gr_ngc,:)
+        end do
+      else if (sim_bcTypeX == "SHOCKVORTEX") then
         ! do outflow
         do i = 1, gr_ngc
           rcv_buffR(:,i,:) = loc_buffR(:,gr_ngc,:)
@@ -351,6 +359,10 @@ module bc
         rcv_buffBL(VELX_VAR,:,:) = 7.1447096
         rcv_buffBL(VELY_VAR,:,:) = -4.125
         rcv_buffBL(PRES_VAR,:,:) = 116.5
+      else if (sim_bcTypeX == "SHOCKVORTEX") then
+        ! inflow, do nothing
+        rcv_buffTL(:,:,:) = V(:, i0:i0+gc, jmax-gc:jmax)
+        rcv_buffBL(:,:,:) = V(:, i0:i0+gc, j0:j0+gc)
       end if  ! sim_bcTypeX
     end if    ! bl_i
 
@@ -370,6 +382,12 @@ module bc
         rcv_buffTR(VELX_VAR,:,:) = -rcv_buffTR(VELX_VAR,:,:)
         rcv_buffBR(VELX_VAR,:,:) = -rcv_buffBR(VELX_VAR,:,:)
       else if (sim_bcTypeX == "DMR") then
+        ! outflow
+        do i = 1, gr_ngc
+          rcv_buffTR(:,i,:) = loc_buffTR(:,gr_ngc,:)
+          rcv_buffBR(:,i,:) = loc_buffBR(:,gr_ngc,:)
+        end do
+      else if (sim_bcTypeX == "SHOCKVORTEX") then
         ! outflow
         do i = 1, gr_ngc
           rcv_buffTR(:,i,:) = loc_buffTR(:,gr_ngc,:)
