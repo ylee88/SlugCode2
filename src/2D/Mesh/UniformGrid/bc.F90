@@ -187,6 +187,7 @@ module bc
             rcv_buffB(VELX_VAR,i,:) = 7.1447096
             rcv_buffB(VELY_VAR,i,:) = -4.125
             rcv_buffB(PRES_VAR,i,:) = 116.5
+            rcv_buffB(EINT_VAR,i,:) = 291.25
           end if
         end do ! end DMR
       else if (sim_bcTypeY == "astrojet") then
@@ -228,12 +229,14 @@ module bc
               rcv_buffT(VELX_VAR,i,j) = 7.1447096
               rcv_buffT(VELY_VAR,i,j) = -4.125
               rcv_buffT(PRES_VAR,i,j) = 116.5
+              rcv_buffT(EINT_VAR,i,:) = 291.25
             else
               ! outside of shock
               rcv_buffT(DENS_VAR,i,j) = 1.4
               rcv_buffT(VELX_VAR,i,j) = 0.
               rcv_buffT(VELY_VAR,i,j) = 0.
               rcv_buffT(PRES_VAR,i,j) = 1.
+              rcv_buffT(EINT_VAR,i,:) = 2.5
             end if
           end do
         end do ! end DMR
