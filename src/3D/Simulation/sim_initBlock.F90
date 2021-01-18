@@ -124,6 +124,21 @@ subroutine sim_initBlock()
           gr_V(VELY_VAR,i,j,k) = 0.
           gr_V(VELZ_VAR,i,j,k) = 0.
 
+        elseif (sim_icType == '3dsod') then
+          x = xx
+          y = yy
+          z = zz
+
+          !         DENS     VELX   VELY   VELZ    PRES
+          Q1 = (/   1.0,     0.0,   0.0,   0.0,    1.0 /)
+          Q2 = (/  0.125,    0.0,   0.0,   0.0,    0.1 /)
+          r2 = x**2 + y**2 + z**2
+          if (sqrt(r2) <= 0.5) then
+            gr_V(:,i,j,k) = Q1
+          else
+            gr_V(:,i,j,k) = Q2
+          end if
+
         elseif (sim_icType == 'tgv') then
           ! see eqn. 4.13 of 10.1016/j.jcp.2020.110006
           x = xx
