@@ -44,7 +44,7 @@ subroutine sim_initBlock()
   !these are used for sedov
   dr2 = (3.5*MIN(gr_dx, gr_dy, gr_dz))
   dr3 = (3.5*MIN(gr_dx, gr_dy, gr_dz))**3
-  E = 0.979264
+  E = 0.851072
 
   rt3 = sqrt(3.)
 
