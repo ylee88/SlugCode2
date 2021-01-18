@@ -16,7 +16,7 @@ subroutine sim_initBlock()
 
   integer :: i, j, k
   integer :: i0, imax, j0, jmax, k0, kmax
-  real :: x, y, z, small, r2, beta, T, dr2, E, gamm
+  real :: x, y, z, small, r2, beta, T, dr2, dr3, E, gamm
   real :: rt3, xcntr, ycntr, zcntr
 
   ! for riemann problem
@@ -42,8 +42,9 @@ subroutine sim_initBlock()
   !some handy constants
   gamm = sim_gamma
   !these are used for sedov
-  dr2 = (3.5*MIN(gr_dx, gr_dy, gr_dz))**2
-  E = 1.
+  dr2 = (3.5*MIN(gr_dx, gr_dy, gr_dz))
+  dr3 = (3.5*MIN(gr_dx, gr_dy, gr_dz))**3
+  E = 0.979264
 
   rt3 = sqrt(3.)
 
@@ -112,8 +113,8 @@ subroutine sim_initBlock()
           y = yy
           z = zz
           r2 = x**2 + y**2 + z**2
-          if (sqrt(r2) < sqrt(dr2)) then
-            gr_V(PRES_VAR,i,j,k) = (gamm-1.)*E/(PI*dr2)
+          if (sqrt(r2) < dr2) then
+            gr_V(PRES_VAR,i,j,k) = (gamm-1.)*3.*E/(4.*PI*dr3)
           else
             gr_V(PRES_VAR,i,j,k) = 1.e-5
           end if
