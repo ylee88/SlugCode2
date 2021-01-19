@@ -1,0 +1,67 @@
+# Please put your runtime parameters: 
+# name, and a space, followed by values 
+
+# sim variables
+sim_name 'tt'
+
+sim_fixDt .false.
+sim_dt 0.001
+
+sim_cfl 0.7
+sim_tmax 5.
+
+sim_nstep 1
+sim_nlim .false.
+
+# unused for FDM
+sim_riemann 'roe'
+sim_limiter 'mc'
+sim_charLimiting .true.
+
+# high order methods
+sim_spatialMethod 'WENO5'
+sim_temporalMethod 'RK3'
+sim_positivityLimiter .false.
+
+# if you need cornerBC, turn this on
+sim_cornerBC .true.
+
+# weno things
+sim_WENO '5'               #'5' or 'Z'
+sim_mval 1                 #ROC power for betas'
+sim_WENeps 1.e-36
+
+# gp things
+sim_gpWENO .false.
+sim_gpKernel 'SE'
+sim_gpRadii 2
+sim_gpEll 1.
+sim_gpEldel 0.
+sim_gpSigdel 3.
+
+# grid variables
+gr_ngc 7
+gr_nx 256
+
+gr_xbeg 0.
+gr_xend 10.
+
+# problem specific physical IC
+sim_icType 'tt'
+sim_gamma 1.4
+sim_smallPres 1.e-12
+
+# BC type
+sim_bcTypeX 'outflow'
+
+# block sizes
+bl_iProcs 4
+
+# IO frequency
+sim_ioTfreq 100000. #real
+sim_ioNfreq -1    #positive integer; zero or negative if not used
+sim_outputIntervalTime 0.1
+
+# IO type
+sim_hdf5 .true.
+sim_pIO .true.

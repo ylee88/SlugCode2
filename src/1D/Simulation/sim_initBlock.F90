@@ -96,6 +96,19 @@ subroutine sim_initBlock()
         gr_V(DENS_VAR:PRES_VAR,i) = Q2(:)
       end if
 
+    elseif (sim_icType == 'tt') then
+      x = xx
+
+      !                  DENS                  VELX        PRES
+      Q1 = (/          1.515695,             0.523346,    1.805 /)    ! left
+      Q2 = (/ 1. + 0.1*SIN(20.*PI*(x-5.)),      0.0,       1.0   /)    ! right
+
+      if (x < 0.5) then
+        gr_V(DENS_VAR:PRES_VAR,i) = Q1(:)
+      else
+        gr_V(DENS_VAR:PRES_VAR,i) = Q2(:)
+      end if
+
     end if    ! icType
 
     gr_V(GAMC_VAR,i) = sim_gamma
