@@ -191,6 +191,22 @@ subroutine sim_initBlock()
           gr_V(PRES_VAR,i,j) = .1
         end if
 
+      elseif (sim_icType == 'shu45') then
+        x = xx
+        y = yy
+        x0 = x*COS(PI/4.) + y*SIN(PI/4.) + 0.25*(gr_dx + gr_dy)
+        if(x0 <= 1. .or. (x0 > 11. .and. x0 <= 21.) .or. (x0 > 31. .and. x0 <= 40.)) then
+          gr_V(DENS_VAR,i,j) = 3.857143
+          gr_V(VELX_VAR,i,j) = 2.629369*COS(PI/4.)
+          gr_V(VELY_VAR,i,j) = 2.629369*SIN(PI/4.)
+          gr_V(PRES_VAR,i,j) = 10.33333
+        else
+          gr_V(DENS_VAR,i,j) = 1 + .2*SIN(5.*x0)
+          gr_V(VELX_VAR,i,j) = 0.
+          gr_V(VELY_VAR,i,j) = 0.
+          gr_V(PRES_VAR,i,j) = 1.
+        end if
+
       elseif (sim_icType == 'astrojet') then
         x = xx
         y = yy
