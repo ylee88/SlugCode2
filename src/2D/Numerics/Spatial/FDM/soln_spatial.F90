@@ -53,7 +53,7 @@ subroutine soln_spatial(dt, prim, cons, flux)
 
   do dir = XDIM, NDIM
 
-    alpha = MAXVAL(gr_maxSpeed(:, dir))
+    alpha = MAXVAL(gr_maxSpeed(:,dir))
 
     select case(dir)
     case(XDIM)

@@ -24,6 +24,8 @@ subroutine soln_spatial(dt, prim, cons, flux)
   real, dimension(NUMB_VAR) :: Vimh
   real, dimension(NSYS_VAR) :: tempL, tempR
 
+  real :: alpha
+
   integer :: i, dir, var
   integer :: ip, im
   integer :: s, si
@@ -46,6 +48,8 @@ subroutine soln_spatial(dt, prim, cons, flux)
   call get_maxSpeed(prim)
 
   do dir = XDIM, NDIM
+
+    alpha = MAXVAL(gr_maxSpeed(:,dir))
 
     select case(dir)
     case(XDIM)
@@ -71,8 +75,8 @@ subroutine soln_spatial(dt, prim, cons, flux)
       call right_eigenvectors(Vimh(:), conservative, reig, dir)
       do s = 1, 2*num_radius+1
         do var = 1, NSYS_VAR
-          Wstncl_L(s, var) = 0.5*dot_product( leig(:,var), Fstncl(:,  s) + gr_maxSpeed(var,dir)*Ustncl(:,  s) )
-          Wstncl_R(s, var) = 0.5*dot_product( leig(:,var), Fstncl(:,s+1) - gr_maxSpeed(var,dir)*Ustncl(:,s+1) )
+          Wstncl_L(s, var) = 0.5*dot_product( leig(:,var), Fstncl(:,  s) + alpha*Ustncl(:,  s) )
+          Wstncl_R(s, var) = 0.5*dot_product( leig(:,var), Fstncl(:,s+1) - alpha*Ustncl(:,s+1) )
         end do
       end do
 
