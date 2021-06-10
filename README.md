@@ -91,13 +91,13 @@ The conventional FDM scheme with Rusanov Lax-Friedrichs flux splitting and flux 
 See details on [A. Mignone *et. al.* Journal of Computational Physics 229.17 (2010): 5896-5920.][fdm]
  - Dimension: 1D, 2D and 3D
  - Spatial method: WENO-{JS, Z}, [GP-WENO][gp-weno], [Nested-WENO][nested-weno]
- - Temporal method: Runge-Kutta {2, 3, 4}, [SF-PIF{3, 4}][sfpif]
+ - Temporal method: SSP-Runge-Kutta {2, 3, 4}, [SF-PIF{3, 4}][sfpif]
 
 
 [fdm]: https://doi.org/10.1016/j.jcp.2010.04.013
 [gp-weno]: https://doi.org/10.1016/j.jcp.2018.12.028
 [nested-weno]: https://doi.org/10.1016/j.jcp.2020.110006
-[sfpif]: https://arxiv.org/abs/2006.00096
+[sfpif]: https://arxiv.org/abs/2103.00414
 
 
 ## License
