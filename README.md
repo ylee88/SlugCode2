@@ -1,8 +1,13 @@
 # SlugCode2
 
-SlugCode2 is in early development stage.
+A high-order, parallelized computational fluid dynamics (CFD) code
+solving [Euler's equations](https://en.wikipedia.org/wiki/Euler_equations_(fluid_dynamics)).
+Currently, it only supports the finite difference method (FDM).
 
-## Install
+
+## Installation
+
+`SlugCode2` requires MPI and HDF5-parallel libraries.
 
 ```sh
 mkdir build
@@ -13,7 +18,7 @@ make
 ```
 
 It will create 2D/Hydro/FDM solver.
-If you want to have 3D solver, use `--fdm3d` flag instead.
+If you want to have 3D (1D) solver, use `--fdm3d` (`--fdm1d`) flag instead.
 
 ## Run
 
@@ -31,7 +36,7 @@ mpirun -np 4 ./slugCode2   # this will read `slug.init`
 ```
 
 `setupSlug.py` will copy every example `.init` files under `/inits` directory,
-including `slug.init` under `src/{2,3}D`.
+including `slug.init` under `src/{1,2,3}D`.
 
 The variable name and its value in `.init` file should be separated with **single space**.
 
@@ -79,42 +84,21 @@ Also, you can use [visit](https://wci.llnl.gov/simulation/computer-codes/visit)
 for more serious plottings.
 Make sure you installed [SlugCode2-extension](plotter/visit/SlugCode/) first.
 
-## Supported schemes
+## Supported high-order schemes
 
 ### Finite Difference Method (FDM)
 The conventional FDM scheme with Rusanov Lax-Friedrichs flux splitting and flux reconstruction.
 See details on [A. Mignone *et. al.* Journal of Computational Physics 229.17 (2010): 5896-5920.][fdm]
- - Dimension: 2D and 3D
- - Spatial method: WENO-{JS, Z}, [GP-WENO][gp-weno]
+ - Dimension: 1D, 2D and 3D
+ - Spatial method: WENO-{JS, Z}, [GP-WENO][gp-weno], [Nested-WENO][nested-weno]
  - Temporal method: Runge-Kutta {2, 3, 4}, [SF-PIF{3, 4}][sfpif]
 
 
 [fdm]: https://doi.org/10.1016/j.jcp.2010.04.013
 [gp-weno]: https://doi.org/10.1016/j.jcp.2018.12.028
+[nested-weno]: https://doi.org/10.1016/j.jcp.2020.110006
 [sfpif]: https://arxiv.org/abs/2006.00096
--------------------------------------------------------------------
 
-## TODOs
 
-- [ ] Implement internal boundary: `BDRY_VAR`
-- [x] Add example `init` files.
-- [x] Add abort conditions for `gr_ngc`
-    - [x] `if gr_ngc > [gr_nx, gr_ny]: abort`
-    - [x] `if gr_ngc < # of guad cell needed: abort`
-- [ ] Rearrange folder structure -> eg:`FDM/[spatial temporal]`
-- [ ] Makefile in each directory to handle `OBJS` accordingly
-    - [ ] Edit `setup.py` to write relevant `Makefile`
-
-### Do FVM
-
-#### Spatial
-
-- [ ] WENO
-- [ ] GP-WENO
-
-#### Temporal
-
-- [ ] RK2
-- [ ] RK3
-- [ ] RK4
-- [ ] PIF-SF
+## License
+MIT.
