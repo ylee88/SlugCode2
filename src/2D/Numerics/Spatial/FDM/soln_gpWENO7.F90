@@ -28,7 +28,7 @@ subroutine soln_gpWENO7(dt, radius, Wl, Wr, reconL, reconR)
 
   real, intent(IN) :: dt
   integer, intent(IN) :: radius
-  real, dimension(2*R+1, NSYS_VAR), intent(IN)  :: Wl, Wr
+  real, dimension(:, :), intent(IN)  :: Wl, Wr
   real, dimension(NSYS_VAR),    intent(OUT) :: reconL, reconR
 
   real, dimension(R+1) :: smth_ind_L, smth_ind_R

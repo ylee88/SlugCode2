@@ -25,7 +25,7 @@ subroutine soln_nestedWENO5(dt, radius, Wl, Wr, reconL, reconR)
 
   real, intent(IN) :: dt
   integer, intent(IN) :: radius
-  real, dimension(5, NSYS_VAR), intent(IN)  :: Wl, Wr
+  real, dimension(:, :), intent(IN)  :: Wl, Wr
   real, dimension(NSYS_VAR),    intent(OUT) :: reconL, reconR
 
   real, dimension(3) :: coeff_q1L, coeff_q1R

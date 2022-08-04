@@ -19,7 +19,7 @@ module num_interface
 
       real, intent(IN) :: dt
       integer, intent(IN) :: radius
-      real, dimension(radius*2+1, NSYS_VAR), intent(IN) :: stnclL, stnclR
+      real, dimension(:, :), intent(IN) :: stnclL, stnclR
       real, dimension(NSYS_VAR) :: reconL, reconR
     end subroutine spatial
   end interface
